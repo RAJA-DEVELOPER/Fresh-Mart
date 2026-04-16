@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication - FreshMart</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        /* Premium Global Scrollbar and Selection */
+        ::selection {
+            background: #a7f3d0;
+            /* emerald-200 */
+            color: #064e3b;
+            /* emerald-900 */
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f8fafc;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .premium-glass {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+    <link rel="stylesheet" href="/css/global.css">
+</head>
+
+<body class="bg-stone-50 min-h-screen text-gray-900 antialiased">
+
+    <!-- Header -->
+    <header class="fixed top-0 left-0 w-full top-0 z-50 bg-white/80 backdrop-blur-2xl border-b border-emerald-100/60 shadow-sm shadow-emerald-500/10">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <!-- Logo -->
+            <a href="/" class="flex items-center space-x-2 shrink-0">
+                <div class="w-10 h-10 bg-green-700 rounded-xl flex items-center justify-center text-white text-xl ">
+                    <i class="fas fa-leaf"></i>
+                </div>
+                <span class="text-2xl font-black tracking-tight text-stone-900 hidden sm:block">FreshMart</span>
+            </a>
+
+            <!-- Search bar -->
+            <div class="hidden lg:flex flex-1 max-w-lg mx-4">
+                <div class="relative w-full">
+                    <input type="text" id="main-search" placeholder="Search products..."
+                        class="w-full bg-emerald-50/80 border border-emerald-200/60 rounded-full py-2.5 px-4 pl-10 focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 focus:bg-white outline-none transition-all duration-300 text-sm font-medium placeholder:text-gray-400">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                </div>
+            </div>
+
+            <!-- Desktop Navigation -->
+            <nav class="hidden xl:flex items-center space-x-6 mx-4 text-sm font-semibold text-gray-600">
+                <a href="/index.html"
+                    class="hover:text-emerald-600 transition-colors">Home</a>
+                <a href="/about.html"
+                    class="hover:text-emerald-600 transition-colors">About</a>
+                <a href="/shop.html"
+                    class="hover:text-emerald-600 transition-colors">Products</a>
+                <a href="/tracking.html"
+                    class="hover:text-emerald-600 transition-colors">Track
+                    Order</a>
+                <a href="/contact.html"
+                    class="hover:text-emerald-600 transition-colors">Contact</a>
+                <a href="/auth.html" id="nav-login" class="text-emerald-600 font-bold flex items-center"
+                    title="Login / Register"><i class="fas fa-user-circle text-[1.35rem]"></i></a>
+                <a href="/dashboard.html" id="nav-dash"
+                    class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 font-semibold hover:bg-emerald-100 transition-all duration-200 hidden">Dashboard</a>
+            </nav>
+
+            <!-- Actions -->
+            <div class="flex items-center space-x-3">
+                <a href="/cart.html" class="relative p-2 group">
+                    <i
+                        class="fas fa-shopping-basket text-xl text-gray-600 group-hover:text-emerald-600 transition-all duration-200"></i>
+                    <span id="cart-badge"
+                        class="absolute -top-1.5 -right-1.5 bg-green-700 text-white text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center hidden ring-2 ring-white ">0</span>
+                </a>
+                <button id="mobile-menu-btn" class="xl:hidden w-10 h-10 flex items-center justify-center bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition-all duration-200">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+
+                <!-- Mobile Search Bar (Visible only on lg and down) -->
+        <div class="lg:hidden px-4 pb-3 w-full">
+            <div class="relative w-full">
+                <input type="text" id="mobile-search" placeholder="Search your daily essentials..."
+                    class="w-full bg-emerald-50/80 border border-emerald-200/60 rounded-[1.25rem] py-2 px-4 pl-10 focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 focus:bg-white outline-none transition-all duration-300 text-sm font-medium placeholder:text-gray-400">
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-emerald-600/50 text-xs"></i>
+            </div>
+        </div>
+
+        
+    </header>
+
+    <main class="flex min-h-[calc(100vh-64px)] lg:h-[calc(100vh-64px)] bg-white overflow-y-auto lg:overflow-hidden">
+        <!-- Left Side: Cinematic Visuals (Hidden on mobile) -->
+        <div class="hidden lg:flex lg:w-1/2 relative overflow-hidden group">
+            <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=1600&q=80" alt="Fresh Produce"
+                class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[10s] ease-linear">
+            <div class="absolute inset-0 bg-gradient-to-br from-emerald-900/40 via-transparent to-black/20"></div>
+
+            <div class="relative z-10 w-full h-full flex flex-col justify-end p-20 text-white">
+                <div
+                    class="bg-white/10 backdrop-blur-xl border border-white/20 p-10 rounded-[3rem] max-w-lg mb-10 transition-all duration-700 hover:bg-white/20">
+                    <span class="text-emerald-400 font-black text-xs uppercase tracking-[0.4em] mb-4 block">Premium
+                        Experience</span>
+                    <h2 class="text-5xl font-black mb-6 leading-tight">Freshness delivered with a touch of elegance.
+                    </h2>
+                    <p class="text-emerald-50/70 text-lg leading-relaxed">Join over 50,000 satisfied families who trust
+                        FreshMart for their daily organic needs.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side: Authentication Forms -->
+        <div class="w-full lg:w-1/2 flex items-center justify-center p-6 md:p-12 bg-white relative">
+            <!-- Decorative background elements -->
+            <div class="absolute top-20 right-20 w-64 h-64 bg-emerald-100/40 rounded-full blur-3xl -z-10 animate-pulse">
+            </div>
+            <div class="absolute bottom-20 left-20 w-64 h-64 bg-amber-100/40 rounded-full blur-3xl -z-10 animate-pulse"
+                style="animation-delay: 2s;"></div>
+
+            <div class="w-full max-w-md">
+                <!-- Toggle Tabs with Sliding Pill -->
+                <div class="relative flex p-1.5 bg-stone-100 rounded-[2rem] mb-12 w-fit mx-auto">
+                    <div id="active-tab-pill"
+                        class="absolute h-[calc(100%-12px)] top-[6px] left-[6px] w-[calc(50%-6px)] bg-white rounded-[1.5rem] shadow-xl shadow-stone-200/50 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] z-10">
+                    </div>
+                    <button onclick="toggleAuth('login')" id="btn-login"
+                        class="relative z-20 px-10 py-3.5 font-bold rounded-[1.5rem] transition-colors duration-300 text-emerald-600">Login</button>
+                    <button onclick="toggleAuth('register')" id="btn-register"
+                        class="relative z-20 px-10 py-3.5 font-bold rounded-[1.5rem] transition-colors duration-300 text-stone-400 hover:text-stone-600">Register</button>
+                </div>
+
+                <!-- Login Form -->
+                <form id="login-form" class="space-y-6">
+                    <div>
+                        <h2 class="text-3xl font-extrabold text-slate-800 mb-2">Welcome Back</h2>
+                        <p class="text-slate-400 text-sm">Please enter your details to sign in.</p>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="relative">
+                            <input type="text" id="login-id" placeholder="Email or Mobile"
+                                class="w-full bg-slate-50 border-none rounded-[1.25rem] p-4 pl-12 focus:ring-1 focus:ring-emerald-500/30 transition-all duration-300 ease-out outline-none">
+                            <i class="far fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        </div>
+                        <div class="relative">
+                            <input type="password" id="login-pass" placeholder="Password"
+                                class="w-full bg-slate-50 border-none rounded-[1.25rem] p-4 pl-12 pr-12 focus:ring-1 focus:ring-emerald-500/30 transition-all duration-300 ease-out outline-none">
+                            <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <button type="button" onclick="togglePassword('login-pass', this)"
+                                class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 transition-colors">
+                                <i class="far fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit"
+                        class="w-full bg-green-700 hover:from-emerald-400 hover:to-teal-500 shadow-[0_20px_50px_rgba(8,112,184,0.07)] shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:-translate-y-0.5 text-white py-4 rounded-[1.25rem] font-bold transition-all duration-300 ease-out shadow-[0_20px_50px_rgba(8,112,184,0.07)] shadow-emerald-500/20">Sign
+                        In</button>
+                    <p class="text-center text-sm text-slate-400">Forgot password? <a href="#"
+                            onclick="toggleAuth('forgot'); return false;" class="text-emerald-600 hover:underline">Reset
+                            it</a></p>
+                </form>
+
+                <!-- Register Form (Hidden) -->
+                <form id="register-form" class="hidden space-y-6">
+                    <div>
+                        <h2 class="text-3xl font-extrabold text-slate-800 mb-2">Create Account</h2>
+                        <p class="text-slate-400 text-sm">Join the FreshMart community today!</p>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="relative">
+                            <input type="text" id="reg-name" placeholder="Full Name"
+                                class="w-full bg-slate-50 border-none rounded-[1.25rem] p-4 pl-12 focus:ring-1 focus:ring-emerald-500/30 outline-none">
+                            <i class="far fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        </div>
+                        <div class="relative">
+                            <input type="email" id="reg-email" placeholder="Email Address" required
+                                class="w-full bg-slate-50 border-none rounded-[1.25rem] p-4 pl-12 focus:ring-1 focus:ring-emerald-500/30 outline-none">
+                            <i class="far fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        </div>
+                        <div class="relative">
+                            <input type="tel" id="reg-mobile" placeholder="Mobile Number (10 digits)" required
+                                pattern="[0-9]{10}" title="Please enter a 10-digit mobile number" maxlength="10"
+                                class="w-full bg-slate-50 border-none rounded-[1.25rem] p-4 pl-12 focus:ring-1 focus:ring-emerald-500/30 outline-none">
+                            <i
+                                class="fas fa-phone-alt absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                        </div>
+                        <div class="relative">
+                            <input type="password" id="reg-pass" placeholder="Password"
+                                class="w-full bg-slate-50 border-none rounded-[1.25rem] p-4 pl-12 pr-12 focus:ring-1 focus:ring-emerald-500/30 outline-none">
+                            <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <button type="button" onclick="togglePassword('reg-pass', this)"
+                                class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 transition-colors">
+                                <i class="far fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit"
+                        class="w-full bg-green-700 hover:from-emerald-400 hover:to-teal-500 shadow-[0_20px_50px_rgba(8,112,184,0.07)] shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:-translate-y-0.5 text-white py-4 rounded-[1.25rem] font-bold transition-all duration-300 ease-out shadow-[0_20px_50px_rgba(8,112,184,0.07)] shadow-emerald-500/20">Create
+                        Account</button>
+                    <p class="text-center text-[10px] text-slate-400 px-4">By registering, you agree to our Terms and
+                        receive
+                        fresh updates from FreshMart.</p>
+                </form>
+
+                <!-- Forgot Password Form (Hidden) -->
+                <form id="forgot-form" class="hidden space-y-6">
+                    <div>
+                        <h2 class="text-3xl font-extrabold text-slate-800 mb-2">Reset Password</h2>
+                        <p class="text-slate-400 text-sm" id="forgot-desc">Enter your email or mobile to receive an OTP.
+                        </p>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="relative">
+                            <input type="text" id="forgot-id" placeholder="Registered Email or Mobile" required
+                                class="w-full bg-slate-50 border-none rounded-[1.25rem] p-4 pl-12 focus:ring-1 focus:ring-emerald-500/30 transition-all duration-300 ease-out outline-none">
+                            <i class="far fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        </div>
+
+                        <div class="relative hidden" id="otp-group">
+                            <input type="text" id="forgot-otp" placeholder="Enter 6-digit OTP"
+                                class="w-full bg-slate-50 border-none rounded-[1.25rem] p-4 pl-12 focus:ring-1 focus:ring-emerald-500/30 transition-all duration-300 ease-out outline-none">
+                            <i class="fas fa-key absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        </div>
+
+                        <div class="relative hidden" id="forgot-pass-group">
+                            <input type="password" id="forgot-pass" placeholder="New Password"
+                                class="w-full bg-slate-50 border-none rounded-[1.25rem] p-4 pl-12 pr-12 focus:ring-1 focus:ring-emerald-500/30 transition-all duration-300 ease-out outline-none">
+                            <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <button type="button" onclick="togglePassword('forgot-pass', this)"
+                                class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 transition-colors">
+                                <i class="far fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="button" id="btn-send-otp"
+                        class="w-full bg-green-700 hover:from-emerald-400 hover:to-teal-500 shadow-[0_20px_50px_rgba(8,112,184,0.07)] shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:-translate-y-0.5 text-white py-4 rounded-[1.25rem] font-bold transition-all duration-300 ease-out shadow-[0_20px_50px_rgba(8,112,184,0.07)] shadow-emerald-500/20">Send
+                        OTP</button>
+
+                    <button type="submit" id="btn-reset-pass"
+                        class="hidden w-full bg-green-700 hover:from-emerald-400 hover:to-teal-500 shadow-[0_20px_50px_rgba(8,112,184,0.07)] shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:-translate-y-0.5 text-white py-4 rounded-[1.25rem] font-bold transition-all duration-300 ease-out shadow-[0_20px_50px_rgba(8,112,184,0.07)] shadow-emerald-500/20">Verify
+                        & Reset Password</button>
+
+                    <p class="text-center text-sm text-slate-400">Remembered it? <a href="#"
+                            onclick="toggleAuth('login'); return false;" class="text-emerald-600 hover:underline">Back
+                            to Login</a></p>
+                </form>
+
+            </div>
+    </main>
+
+    <footer class="p-8 text-center text-slate-300 text-xs">
+        &copy; 2026 FreshMart Supermarket. All rights reserved.
+    </footer>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/utils/utils.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            utils.initNavbar();
+        });
+
+        function togglePassword(id, btn) {
+            const input = document.getElementById(id);
+            const icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        function toggleAuth(type) {
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const forgotForm = document.getElementById('forgot-form');
+            const pill = document.getElementById('active-tab-pill');
+            const btnLogin = document.getElementById('btn-login');
+            const btnReg = document.getElementById('btn-register');
+
+            if (type === 'login') {
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                forgotForm.classList.add('hidden');
+
+                pill.style.left = '6px';
+                btnLogin.classList.add('text-emerald-600');
+                btnLogin.classList.remove('text-stone-400');
+                btnReg.classList.add('text-stone-400');
+                btnReg.classList.remove('text-emerald-600');
+            } else if (type === 'register') {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+                forgotForm.classList.add('hidden');
+
+                pill.style.left = 'calc(50% - 0px)';
+                btnReg.classList.add('text-emerald-600');
+                btnReg.classList.remove('text-stone-400');
+                btnLogin.classList.add('text-stone-400');
+                btnLogin.classList.remove('text-emerald-600');
+            } else if (type === 'forgot') {
+                loginForm.classList.add('hidden');
+                registerForm.classList.add('hidden');
+                forgotForm.classList.remove('hidden');
+                btnLogin.classList.remove('bg-white', 'text-emerald-600', 'shadow-[0_8px_30px_rgb(0,0,0,0.04)]');
+                btnLogin.classList.add('text-slate-400');
+                btnReg.classList.remove('bg-white', 'text-emerald-600', 'shadow-[0_8px_30px_rgb(0,0,0,0.04)]');
+                btnReg.classList.add('text-slate-400');
+
+                // Reset forgot form state
+                document.getElementById('forgot-id').disabled = false;
+                document.getElementById('otp-group').classList.add('hidden');
+                document.getElementById('forgot-pass-group').classList.add('hidden');
+                document.getElementById('forgot-otp').required = false;
+                document.getElementById('forgot-pass').required = false;
+                document.getElementById('btn-send-otp').classList.remove('hidden');
+                document.getElementById('btn-reset-pass').classList.add('hidden');
+                document.getElementById('forgot-desc').innerText = "Enter your email or mobile to receive an OTP.";
+            }
+        }
+
+        // Login Handler
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const identifier = document.getElementById('login-id').value;
+            const password = document.getElementById('login-pass').value;
+
+            try {
+                const res = await api.post('/auth/login', { identifier, password });
+                localStorage.setItem('token', res.token);
+                localStorage.setItem('user', JSON.stringify(res.user || {}));
+
+                // Redirect based on role set in token/res
+                if (res.user && res.user.role === 'admin') {
+                    window.location.href = '/admin/index.html';
+                } else {
+                    window.location.href = '/';
+                }
+            } catch (err) {
+                utils.showToast(err.message, 'error');
+            }
+        });
+
+        // Register Handler
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('reg-name').value;
+            const email = document.getElementById('reg-email').value;
+            const mobile = document.getElementById('reg-mobile').value;
+            const password = document.getElementById('reg-pass').value;
+
+            // Manual Validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                utils.showToast('Please enter a valid email address.', 'error');
+                return;
+            }
+
+            const mobileRegex = /^[0-9]{10}$/;
+            if (!mobileRegex.test(mobile)) {
+                utils.showToast('Mobile number must be exactly 10 digits.', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                utils.showToast('Password must be at least 6 characters.', 'error');
+                return;
+            }
+
+            const data = { name, email, mobile, password };
+
+            try {
+                await api.post('/auth/register', data);
+                utils.showToast('Registration successful! Please login.', 'success');
+                toggleAuth('login');
+            } catch (err) {
+                utils.showToast(err.message, 'error');
+            }
+        });
+
+        // Send OTP Handler
+        document.getElementById('btn-send-otp').addEventListener('click', async () => {
+            const identifier = document.getElementById('forgot-id').value;
+            if (!identifier) {
+                utils.showToast('Please enter your email or mobile number.', 'error');
+                return;
+            }
+
+            try {
+                const btn = document.getElementById('btn-send-otp');
+                const originalText = btn.innerText;
+                btn.innerText = 'Sending...';
+                btn.disabled = true;
+
+                const res = await api.post('/auth/forgot-password', { identifier });
+
+                utils.showToast(res.message, 'success');
+                if (res.testOtp) {
+                    console.log('TEST OTP:', res.testOtp);
+                }
+
+                // Switch UI to verification mode
+                document.getElementById('forgot-id').disabled = true;
+                document.getElementById('otp-group').classList.remove('hidden');
+                document.getElementById('forgot-pass-group').classList.remove('hidden');
+                document.getElementById('forgot-otp').required = true;
+                document.getElementById('forgot-pass').required = true;
+
+                btn.classList.add('hidden');
+                document.getElementById('btn-reset-pass').classList.remove('hidden');
+                document.getElementById('forgot-desc').innerText = "Enter the OTP sent to you and your new password.";
+
+            } catch (err) {
+                utils.showToast(err.message || 'Error sending OTP', 'error');
+            } finally {
+                const btn = document.getElementById('btn-send-otp');
+                btn.innerText = 'Send OTP';
+                btn.disabled = false;
+            }
+        });
+
+        // Forgot Password Verify & Reset Handler
+        document.getElementById('forgot-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const identifier = document.getElementById('forgot-id').value;
+            const otp = document.getElementById('forgot-otp').value;
+            const newPassword = document.getElementById('forgot-pass').value;
+
+            try {
+                const btn = document.getElementById('btn-reset-pass');
+                const originalText = btn.innerText;
+                btn.innerText = 'Resetting...';
+                btn.disabled = true;
+
+                await api.post('/auth/reset-password', { identifier, otp, newPassword });
+                utils.showToast('Password reset successful! Please login with your new password.', 'success');
+
+                document.getElementById('forgot-id').value = '';
+                document.getElementById('forgot-otp').value = '';
+                document.getElementById('forgot-pass').value = '';
+                toggleAuth('login');
+
+            } catch (err) {
+                utils.showToast(err.message || 'Error resetting password', 'error');
+            } finally {
+                const btn = document.getElementById('btn-reset-pass');
+                btn.innerText = 'Verify & Reset Password';
+                btn.disabled = false;
+            }
+        });
+    </script>
+    <!-- Mobile Menu Drawer -->
+    <div id="mobile-menu"
+        class="hidden fixed inset-0 z-[1000] bg-emerald-900/60 backdrop-blur-md transition-all duration-500">
+        <div
+            class="bg-gradient-to-b from-white via-white to-emerald-50 w-3/4 h-full p-6 flex flex-col border-r border-emerald-100/50 shadow-[20px_0_40px_rgba(0,0,0,0.1)] overflow-y-auto">
+            <div class="flex items-center justify-between mb-8 pb-4 border-b">
+                <span class="text-xl font-bold text-emerald-800 flex items-center gap-2">
+                    <i class="fas fa-leaf text-emerald-600"></i> Menu
+                </span>
+                <button onclick="document.getElementById('mobile-menu').classList.add('hidden')" class="text-slate-400 hover:text-emerald-600"><i
+                        class="fas fa-times text-2xl"></i></button>
+            </div>
+            <nav class="flex flex-col space-y-4 text-lg font-medium text-slate-600">
+                <a href="/index.html" class="hover:text-emerald-600 py-1 transition-colors">Home</a>
+                <a href="/index2.html" class="hover:text-emerald-600 py-1 transition-colors">Home 2</a>
+                <a href="/about.html" class="hover:text-emerald-600 py-1 transition-colors">About</a>
+                <a href="/shop.html" class="hover:text-emerald-600 py-1 transition-colors">Products</a>
+                <a href="/tracking.html" class="hover:text-emerald-600 py-1 transition-colors">Track Order</a>
+
+
+                <a href="/contact.html" class="hover:text-emerald-600 py-1 transition-colors">Contact</a>
+                <a href="/auth.html" id="mobile-nav-login"
+                    class="hover:text-emerald-600 py-1 transition-colors">Login/Register</a>
+                <a href="/dashboard.html" id="mobile-nav-dash"
+                    class="hover:text-emerald-600 py-1 transition-colors hidden">Dashboard</a>
+                <button id="mobile-nav-logout" onclick="utils.logout()"
+                    class="hidden text-left text-red-500 py-1 transition-colors font-bold mt-4 pt-4 border-t border-slate-300/50/60">Sign
+                    Out</button>
+            </nav>
+
+        </div>
+    </div>
+</body>
+
+</html>

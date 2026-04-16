@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Orders - FreshMart Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body>
+    <div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <aside id="admin-sidebar">
+        <div class="sidebar-logo">
+            <i class="fas fa-leaf" style="color:#34d399;font-size:1.4rem"></i>
+            <span>FreshMart <span class="badge">ADMIN</span></span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/admin/index.html" class="nav-item" data-page="index"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
+            <a href="/admin/products.html" class="nav-item" data-page="products"><i class="fas fa-box"></i><span>Products</span></a>
+            <a href="/admin/orders.html" class="nav-item active" data-page="orders"><i class="fas fa-shopping-cart"></i><span>Orders</span></a>
+            <a href="/admin/customers.html" class="nav-item" data-page="customers"><i class="fas fa-users"></i><span>Customers</span></a>
+            <a href="/admin/coupons.html" class="nav-item" data-page="coupons"><i class="fas fa-ticket-alt"></i><span>Coupons</span></a>
+            <a href="/admin/delivery.html" class="nav-item" data-page="delivery"><i class="fas fa-truck-fast"></i><span>Delivery</span></a>
+            <a href="/admin/reports.html" class="nav-item" data-page="reports"><i class="fas fa-chart-bar"></i><span>Reports</span></a>
+        </nav>
+        <div class="sidebar-footer">
+            <button onclick="logout()"><i class="fas fa-power-off"></i><span>Sign Out</span></button>
+        </div>
+    </aside>
+
+    <div id="admin-main">
+        <div class="admin-topbar">
+            <button id="hamburger-btn" onclick="openSidebar()"><i class="fas fa-bars"></i></button>
+            <div class="logo-text"><i class="fas fa-leaf" style="color:#059669"></i> FreshMart Admin</div>
+            <div style="width:32px;height:32px;border-radius:10px;background:#059669;display:flex;align-items:center;justify-content:center;color:#fff"><i class="fas fa-shopping-cart"></i></div>
+        </div>
+
+        <div class="admin-content">
+            <div class="page-header">
+                <div>
+                    <h1>Order Management</h1>
+                    <p>Track and update the status of supermarket customer orders.</p>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="filter-bar">
+                <div class="search-wrap">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="order-search" placeholder="Search by Order ID or Customer...">
+                </div>
+                <select id="status-filter">
+                    <option value="">All Statuses</option>
+                    <option>Placed</option>
+                    <option>Packed</option>
+                    <option>Out for Delivery</option>
+                    <option>Delivered</option>
+                    <option>Cancelled</option>
+                </select>
+            </div>
+
+            <!-- Desktop Table -->
+            <div class="table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Payment</th>
+                            <th>Status</th>
+                            <th style="text-align:right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="order-table-body" class="desktop-table">
+                        <tr><td colspan="7" style="text-align:center;padding:60px;color:#94a3b8">Loading orders...</td></tr>
+                    </tbody>
+                </table>
+                <!-- Mobile Cards -->
+                <div id="order-cards" class="mobile-cards"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Detail Modal -->
+    <div id="order-modal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+            <div id="order-detail-content"></div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/utils/utils.js"></script>
+    <script>
+        let socket, allOrders = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            isAdmin();
+            loadOrders();
+            initSocket();
+            document.getElementById('status-filter').addEventListener('change', applyFilters);
+            document.getElementById('order-search').addEventListener('input', applyFilters);
+        });
+
+        function openSidebar() {
+            document.getElementById('admin-sidebar').classList.add('open');
+            document.getElementById('sidebar-overlay').classList.add('show');
+        }
+        function closeSidebar() {
+            document.getElementById('admin-sidebar').classList.remove('open');
+            document.getElementById('sidebar-overlay').classList.remove('show');
+        }
+
+        function initSocket() {
+            socket = io();
+            socket.emit('join_admin');
+            socket.on('NEW_ORDER', (o) => { utils.showToast(`New Order #${o.id} received!`); loadOrders(); });
+            socket.on('ORDER_STATUS_UPDATE', () => loadOrders());
+        }
+
+        function isAdmin() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const token = localStorage.getItem('token');
+            if (!token || user.role !== 'admin') { localStorage.clear(); window.location.href = '/auth.html'; }
+        }
+
+        function getStatusBadge(status) {
+            const map = { 'Placed':'badge-blue','Packed':'badge-yellow','Out for Delivery':'badge-purple','Delivered':'badge-green','Cancelled':'badge-red' };
+            return `<span class="badge ${map[status]||'badge-gray'}">${status}</span>`;
+        }
+
+        async function loadOrders() {
+            try {
+                const res = await api.get('/admin/orders');
+                allOrders = res.orders;
+                applyFilters();
+            } catch (e) { console.error('Error loading orders', e); }
+        }
+
+        function applyFilters() {
+            const search = document.getElementById('order-search').value.toLowerCase();
+            const status = document.getElementById('status-filter').value;
+            let orders = allOrders;
+            if (status) orders = orders.filter(o => o.status === status);
+            if (search) orders = orders.filter(o => o.id.toString().includes(search) || o.customer_name.toLowerCase().includes(search));
+            renderOrders(orders);
+        }
+
+        function renderOrders(orders) {
+            const tbody = document.getElementById('order-table-body');
+            const cards = document.getElementById('order-cards');
+
+            if (orders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:60px;color:#94a3b8">No matching orders found.</td></tr>';
+                cards.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8">No orders found.</div>';
+                return;
+            }
+
+            // Desktop rows
+            tbody.innerHTML = orders.map(o => `
+                <tr>
+                    <td><strong>#FM-${o.id}</strong></td>
+                    <td>${o.customer_name}</td>
+                    <td style="color:#94a3b8">${new Date(o.created_at).toLocaleDateString()}</td>
+                    <td style="font-weight:800;color:#059669">${utils.formatCurrency(o.final_amount)}</td>
+                    <td><span style="font-size:11px;color:#64748b">${o.payment_method}</span></td>
+                    <td>${getStatusBadge(o.status)}</td>
+                    <td style="text-align:right">
+                        <button onclick="viewOrder(${o.id})" style="background:#f0fdf4;border:none;border-radius:10px;padding:8px 14px;font:700 0.8rem 'Plus Jakarta Sans',sans-serif;color:#059669;cursor:pointer;transition:all 0.2s"
+                            onmouseover="this.style.background='#059669';this.style.color='#fff'"
+                            onmouseout="this.style.background='#f0fdf4';this.style.color='#059669'">
+                            Update
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Mobile cards
+            cards.innerHTML = orders.map(o => `
+                <div class="data-card">
+                    <div class="data-card-row">
+                        <span style="font-weight:800;color:#1e293b;font-size:1rem">#FM-${o.id}</span>
+                        <span style="font-weight:800;color:#059669">${utils.formatCurrency(o.final_amount)}</span>
+                    </div>
+                    <div class="data-card-row" style="margin-top:4px">
+                        <span style="font-size:0.85rem;color:#64748b">${o.customer_name}</span>
+                        ${getStatusBadge(o.status)}
+                    </div>
+                    <div class="data-card-row" style="margin-top:4px">
+                        <span style="font-size:0.75rem;color:#94a3b8">${new Date(o.created_at).toLocaleDateString()} • ${o.payment_method}</span>
+                        <button onclick="viewOrder(${o.id})" style="background:#f0fdf4;border:none;border-radius:8px;padding:6px 12px;font:700 0.75rem 'Plus Jakarta Sans',sans-serif;color:#059669;cursor:pointer">Update</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function viewOrder(id) {
+            try {
+                const res = await api.get(`/admin/orders/${id}`);
+                const order = res.order;
+                document.getElementById('order-modal').classList.remove('hidden');
+                document.getElementById('order-detail-content').innerHTML = `
+                    <h2 class="modal-title" style="margin-bottom:6px">Order #FM-${order.id}</h2>
+                    <p style="color:#94a3b8;font-size:0.85rem;margin-bottom:24px">By ${order.customer_name} · ${new Date(order.created_at).toLocaleString()}</p>
+
+                    <div class="form-grid" style="margin-bottom:20px">
+                        <div style="background:#f8fafc;border-radius:16px;padding:16px">
+                            <div class="form-label" style="margin-bottom:8px">Update Status</div>
+                            <select id="update-status-val" onchange="updateStatus(${order.id}, this.value)" class="form-input" style="padding:10px 12px">
+                                ${['Placed','Packed','Out for Delivery','Delivered','Cancelled'].map(s =>
+                                    `<option ${order.status===s?'selected':''}>${s}</option>`
+                                ).join('')}
+                            </select>
+                        </div>
+                        <div style="background:#f8fafc;border-radius:16px;padding:16px">
+                            <div class="form-label" style="margin-bottom:8px">Total Amount</div>
+                            <div style="font-size:1.5rem;font-weight:800;color:#1e293b">${utils.formatCurrency(order.final_amount)}</div>
+                        </div>
+                    </div>
+
+                    <div style="background:#f8fafc;border-radius:16px;padding:16px;margin-bottom:16px">
+                        <div class="form-label" style="margin-bottom:6px">Delivery Address</div>
+                        <p style="font-size:0.875rem;color:#475569;margin:0">${order.address.street}, ${order.address.city}, ${order.address.state} - ${order.address.zip_code}</p>
+                    </div>
+
+                    <div style="border:2px dashed #e2e8f0;border-radius:16px;padding:16px;margin-bottom:20px">
+                        <div class="form-label" style="margin-bottom:12px">Items</div>
+                        ${order.items.map(i => `
+                            <div style="display:flex;justify-content:space-between;font-size:0.875rem;padding:6px 0;border-bottom:1px solid #f1f5f9">
+                                <span style="color:#475569">${i.name} × ${i.quantity}</span>
+                                <span style="font-weight:700;color:#1e293b">${utils.formatCurrency(i.price * i.quantity)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <button onclick="closeModal()" style="width:100%;background:#f8fafc;border:none;border-radius:14px;padding:14px;font:700 0.9rem 'Plus Jakarta Sans',sans-serif;color:#64748b;cursor:pointer">Close</button>
+                `;
+            } catch (e) { utils.showToast(e.message, 'error'); }
+        }
+
+        async function updateStatus(id, status) {
+            if (status === 'Cancelled') {
+                const confirmed = await utils.showConfirm('Cancel Order', 'Are you sure you want to cancel this order? This action cannot be undone.');
+                if (!confirmed) {
+                    // Revert the select element to current status
+                    const currentOrder = allOrders.find(o => o.id === id);
+                    if (currentOrder) {
+                        document.getElementById('update-status-val').value = currentOrder.status;
+                    }
+                    return;
+                }
+                
+                try {
+                    await api.put(`/admin/orders/${id}/cancel`);
+                    utils.showToast(`Order #${id} cancelled successfully!`);
+                    loadOrders();
+                } catch (e) { utils.showToast(e.message, 'error'); }
+                return;
+            }
+
+            try {
+                await api.put(`/admin/orders/${id}/status`, { status });
+                utils.showToast(`Order #${id} → ${status}`);
+                loadOrders();
+            } catch (e) { utils.showToast(e.message, 'error'); }
+        }
+
+        function closeModal() { document.getElementById('order-modal').classList.add('hidden'); }
+        function logout() { localStorage.clear(); window.location.href = '/auth.html'; }
+    </script>
+</body>
+</html>

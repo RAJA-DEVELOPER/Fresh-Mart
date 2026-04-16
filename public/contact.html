@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - FreshMart</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        /* Premium Global Scrollbar and Selection */
+        ::selection {
+            background: #a7f3d0;
+            /* emerald-200 */
+            color: #064e3b;
+            /* emerald-900 */
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f8fafc;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .premium-glass {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+    <link rel="stylesheet" href="/css/global.css">
+</head>
+
+<body class="bg-stone-50 min-h-screen text-gray-900 antialiased">
+
+    <!-- Header -->
+    <header
+        class="fixed top-0 left-0 w-full top-0 z-50 bg-white/80 backdrop-blur-2xl border-b border-emerald-100/60 shadow-sm shadow-emerald-500/10">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <!-- Logo -->
+            <a href="/" class="flex items-center space-x-2 shrink-0">
+                <div class="w-10 h-10 bg-green-700 rounded-xl flex items-center justify-center text-white text-xl ">
+                    <i class="fas fa-leaf"></i>
+                </div>
+                <span class="text-2xl font-black tracking-tight text-stone-900 hidden sm:block">FreshMart</span>
+            </a>
+
+            <!-- Search bar -->
+            <div class="hidden lg:flex flex-1 max-w-lg mx-4">
+                <div class="relative w-full">
+                    <input type="text" id="main-search" placeholder="Search products..."
+                        class="w-full bg-emerald-50/80 border border-emerald-200/60 rounded-full py-2.5 px-4 pl-10 focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 focus:bg-white outline-none transition-all duration-300 text-sm font-medium placeholder:text-gray-400">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                </div>
+            </div>
+
+            <!-- Desktop Navigation -->
+            <nav class="hidden xl:flex items-center space-x-6 mx-4 text-sm font-semibold text-gray-600">
+                <a href="/index.html" class="hover:text-emerald-600 transition-colors">Home</a>
+                <a href="/about.html" class="hover:text-emerald-600 transition-colors">About</a>
+                <a href="/shop.html" class="hover:text-emerald-600 transition-colors">Products</a>
+                <a href="/tracking.html" class="hover:text-emerald-600 transition-colors">Track
+                    Order</a>
+                <a href="/contact.html" class="text-emerald-600 font-bold">Contact</a>
+                <a href="/auth.html" id="nav-login" class="hover:text-emerald-600 transition-colors flex items-center"
+                    title="Login / Register"><i class="fas fa-user-circle text-[1.35rem]"></i></a>
+                <a href="/dashboard.html" id="nav-dash"
+                    class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 font-semibold hover:bg-emerald-100 transition-all duration-200 hidden">Dashboard</a>
+            </nav>
+
+            <!-- Actions -->
+            <div class="flex items-center space-x-3">
+                <button id="nav-logout" onclick="utils.logout()"
+                    class="hidden xl:flex text-gray-400 hover:text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-xl transition-all duration-200 text-sm font-bold items-center gap-2 mr-2">
+                    <i class="fas fa-sign-out-alt mr-2"></i><span>Sign Out</span>
+                </button>
+                <a href="/cart.html" class="relative p-2 group">
+                    <i
+                        class="fas fa-shopping-basket text-xl text-gray-600 group-hover:text-emerald-600 transition-all duration-200"></i>
+                    <span id="cart-badge"
+                        class="absolute -top-1.5 -right-1.5 bg-green-700 text-white text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center hidden ring-2 ring-white ">0</span>
+                </a>
+                <button id="mobile-menu-btn"
+                    class="xl:hidden w-10 h-10 flex items-center justify-center bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition-all duration-200">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Search Bar (Visible only on lg and down) -->
+        <div class="lg:hidden px-4 pb-3 w-full">
+            <div class="relative w-full">
+                <input type="text" id="mobile-search" placeholder="Search your daily essentials..."
+                    class="w-full bg-emerald-50/80 border border-emerald-200/60 rounded-[1.25rem] py-2 px-4 pl-10 focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 focus:bg-white outline-none transition-all duration-300 text-sm font-medium placeholder:text-gray-400">
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-emerald-600/50 text-xs"></i>
+            </div>
+        </div>
+
+
+    </header>
+
+    <main class="container mx-auto px-4 py-16">
+        <div class="max-w-6xl mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
+                <!-- Contact Info -->
+                <div class="space-y-12">
+                    <div>
+                        <h1 class="text-3xl sm:text-5xl font-extrabold text-slate-800 mb-6 leading-tight">Get in touch
+                            with <span class="text-emerald-600">FreshMart.</span></h1>
+                        <p class="text-slate-400 text-lg">We're here to support you with your grocery needs. Reach out
+                            to us via any of these channels.</p>
+                    </div>
+
+                    <div class="space-y-8">
+                        <div class="flex items-start space-x-6">
+                            <div
+                                class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-xl flex-shrink-0">
+                                <i class="fas fa-phone-alt"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-800 mb-1">Call Us</h3>
+                                <p class="text-slate-400 font-medium">+91 1800-FRESH-MART</p>
+                                <p class="text-xs text-slate-300">Mon-Sun, 7 AM - 10 PM</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-6">
+                            <div
+                                class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-xl flex-shrink-0">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-800 mb-1">Email Support</h3>
+                                <p class="text-slate-400 font-medium">help@freshmart.in</p>
+                                <p class="text-xs text-slate-300">Avg response time: 2 hours</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-6">
+                            <div
+                                class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-xl flex-shrink-0">
+                                <i class="fas fa-location-dot"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-800 mb-1">Our HQ</h3>
+                                <p class="text-slate-400 font-medium">123, Fresh Street, Organic Hub<br>Chennai, Tamil
+                                    Nadu - 600001</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Department Grid -->
+                    <div
+                        class="grid grid-cols-2 gap-4 mt-12 bg-emerald-50/50 p-6 rounded-[2rem] border border-emerald-100/50">
+                        <div>
+                            <h4 class="font-bold text-slate-800 text-sm mb-2 uppercase tracking-tight">Wholesale & Bulk
+                            </h4>
+                            <p class="text-xs text-slate-500 mb-1 font-medium">bulk@freshmart.in</p>
+                            <span class="text-[10px] text-emerald-600 font-bold">Responds in 24h</span>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-800 text-sm mb-2 uppercase tracking-tight">Vendors</h4>
+                            <p class="text-xs text-slate-500 mb-1 font-medium">partners@freshmart.in</p>
+                            <span class="text-[10px] text-emerald-600 font-bold">New Listings Only</span>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-emerald-100/50">
+                            <h4 class="font-bold text-slate-800 text-sm mb-2 uppercase tracking-tight">Careers</h4>
+                            <p class="text-xs text-slate-500 mb-1 font-medium">jobs@freshmart.in</p>
+                            <span class="text-[10px] text-emerald-600 font-bold">HR Department</span>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-emerald-100/50">
+                            <h4 class="font-bold text-slate-800 text-sm mb-2 uppercase tracking-tight">Media</h4>
+                            <p class="text-xs text-slate-500 mb-1 font-medium">press@freshmart.in</p>
+                            <span class="text-[10px] text-emerald-600 font-bold">Press Kit available</span>
+                        </div>
+                    </div>
+
+                    <!-- Socials -->
+                    <div class="flex items-center space-x-4">
+                        <a href="#"
+                            class="w-10 h-10 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center hover:bg-green-700 shadow-[0_10px_40px_rgb(0,0,0,0.06)] shadow-emerald-500/20 hover:text-white transition-all duration-300 ease-out"><i
+                                class="fab fa-facebook-f"></i></a>
+                        <a href="#"
+                            class="w-10 h-10 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center hover:bg-green-700 shadow-[0_10px_40px_rgb(0,0,0,0.06)] shadow-emerald-500/20 hover:text-white transition-all duration-300 ease-out"><i
+                                class="fab fa-instagram"></i></a>
+                        <a href="#"
+                            class="w-10 h-10 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center hover:bg-green-700 shadow-[0_10px_40px_rgb(0,0,0,0.06)] shadow-emerald-500/20 hover:text-white transition-all duration-300 ease-out"><i
+                                class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+
+                <!-- Contact Form -->
+                <div
+                    class="bg-white p-6 sm:p-10 md:p-14 rounded-[3rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-300/50/60 self-start">
+                    <h2 class="text-3xl font-extrabold text-slate-800 mb-8">Send a Message</h2>
+                    <form id="contact-form" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Full
+                                    Name</label>
+                                <input type="text" id="name" placeholder="John Doe"
+                                    class="w-full bg-slate-50 border-none rounded-2xl p-4 focus:ring-1 focus:ring-emerald-500/30"
+                                    required>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Email
+                                    Address</label>
+                                <input type="email" id="email" placeholder="john@example.com"
+                                    class="w-full bg-slate-50 border-none rounded-2xl p-4 focus:ring-1 focus:ring-emerald-500/30"
+                                    required>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label
+                                class="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Subject</label>
+                            <select id="subject"
+                                class="w-full bg-slate-50 border-none rounded-2xl p-4 focus:ring-1 focus:ring-emerald-500/30 cursor-pointer">
+                                <option>Order Related Issue</option>
+                                <option>Delivery Status Inquiry</option>
+                                <option>Product Quality Concern</option>
+                                <option>Business Inquiry</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label
+                                class="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Message</label>
+                            <textarea id="message" rows="5" placeholder="Tell us how we can help..."
+                                class="w-full bg-slate-50 border-none rounded-2xl p-4 focus:ring-1 focus:ring-emerald-500/30"
+                                required></textarea>
+                        </div>
+
+                        <button type="submit"
+                            class="w-full bg-green-700 hover:from-emerald-400 hover:to-teal-500 shadow-[0_20px_50px_rgba(8,112,184,0.07)] shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:-translate-y-0.5 text-white py-5 rounded-2xl font-bold  transition-all duration-300 ease-out flex items-center justify-center space-x-3">
+                            <span>Submit Request</span>
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- FAQ Section -->
+            <div class="mt-32">
+                <div class="text-center max-w-2xl mx-auto mb-16">
+                    <h2 class="text-4xl font-extrabold text-slate-800 mb-4">Quick Help & FAQs</h2>
+                    <p class="text-slate-400">Can't find what you're looking for? Here are some quick answers to common
+                        grocery queries.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div
+                        class="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-md transition-all">
+                        <div
+                            class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center mb-6">
+                            <i class="fas fa-truck text-lg"></i>
+                        </div>
+                        <h4 class="font-bold text-slate-800 mb-3">Same Day Delivery?</h4>
+                        <p class="text-sm text-slate-500 leading-relaxed">Yes! Orders placed before 2 PM are eligible
+                            for same-day delivery within Chennai city limits.</p>
+                    </div>
+                    <div
+                        class="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-md transition-all">
+                        <div
+                            class="w-12 h-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center mb-6">
+                            <i class="fas fa-undo-alt text-lg"></i>
+                        </div>
+                        <h4 class="font-bold text-slate-800 mb-3">Return Policy</h4>
+                        <p class="text-sm text-slate-500 leading-relaxed">We offer a 24-hour return policy for fresh
+                            produce and a 7-day policy for pantry items.</p>
+                    </div>
+                    <div
+                        class="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-md transition-all">
+                        <div
+                            class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mb-6">
+                            <i class="fas fa-wallet text-lg"></i>
+                        </div>
+                        <h4 class="font-bold text-slate-800 mb-3">Payment Methods</h4>
+                        <p class="text-sm text-slate-500 leading-relaxed">We accept all major credit/debit cards, UPI,
+                            and Cash on Delivery for orders below ₹5000.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HQ Map Section -->
+            <div class="mt-20">
+                <div
+                    class="bg-white p-8 rounded-[3rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-300/50/60 overflow-hidden">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                        <div>
+                            <h2 class="text-3xl font-extrabold text-slate-800">Visit Our Store</h2>
+                            <p class="text-slate-400 mt-2">Find us at the heart of Chennai's organic hub.</p>
+                        </div>
+                        <a href="https://www.google.com/maps?q=13.0827,80.2707" target="_blank"
+                            class="bg-emerald-50 text-emerald-600 px-6 py-3 rounded-2xl font-bold flex items-center space-x-2 hover:bg-emerald-100 transition-all duration-300 ease-out text-sm self-start">
+                            <i class="fas fa-directions"></i>
+                            <span>Get Directions</span>
+                        </a>
+                    </div>
+                    <div id="contact-map" class="w-full h-[450px] bg-slate-50 rounded-[2rem] z-10 shadow-inner"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-white pt-16 mt-24">
+        <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-12 gap-x-12 pb-12 text-center md:text-left">
+            <div class="flex flex-col items-center md:items-start">
+                <a href="/" class="flex items-center justify-center md:justify-start space-x-2 mb-6">
+                    <div
+                        class="w-10 h-10 bg-green-700 shadow-[0_10px_40px_rgb(0,0,0,0.06)] shadow-emerald-500/20 rounded flex items-center justify-center text-white">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <span class="text-xl font-black text-stone-900 tracking-tight">FreshMart</span>
+                </a>
+                <p class="text-gray-400 leading-relaxed text-sm max-w-xs">Your neighborhood's favorite grocery store, now online.
+                    We deliver freshness to your doorstep within hours.</p>
+            </div>
+            <div class="flex flex-col items-center md:items-start">
+                <h4 class="font-bold mb-6 text-stone-900 text-sm tracking-widest uppercase">Quick Links</h4>
+                <ul class="space-y-3 text-gray-400 text-sm">
+                    <li><a href="/index.html" class="hover:text-emerald-600 transition-colors">Home</a></li>
+                    <li><a href="/index2.html" class="hover:text-emerald-600 transition-colors">Home 2</a></li>
+                    <li><a href="/about.html" class="hover:text-emerald-600 transition-colors">About Us</a></li>
+                    <li><a href="/shop.html" class="hover:text-emerald-600 transition-colors">Products</a></li>
+                    <li><a href="/cart.html" class="hover:text-emerald-600 transition-colors">My Cart</a></li>
+                    <li><a href="/tracking.html" class="hover:text-emerald-600 transition-colors">Track Order</a></li>
+                </ul>
+            </div>
+            <div class="flex flex-col items-center md:items-start">
+                <h4 class="font-bold mb-6 text-stone-900 text-sm tracking-widest uppercase">Support</h4>
+                <ul class="space-y-3 text-gray-400 text-sm">
+                    <li><a href="/contact.html" class="hover:text-emerald-600 transition-colors">Contact Support</a></li>
+                    <li><a href="/faq.html" class="hover:text-emerald-600 transition-colors">FAQs</a></li>
+                    <li><a href="/privacy.html" class="hover:text-emerald-600 transition-colors">Privacy Policy</a></li>
+                    <li><a href="/terms.html" class="hover:text-emerald-600 transition-colors">Terms of Service</a></li>
+                </ul>
+            </div>
+            <div class="flex flex-col items-center md:items-start">
+                <h4 class="font-bold mb-6 text-stone-900 text-sm tracking-widest uppercase">Newsletter</h4>
+                <p class="text-gray-400 mb-6 text-sm">Get the latest offers and fresh updates.</p>
+                <div class="flex h-12 w-full max-w-sm">
+                    <input type="email" placeholder="Your email"
+                        class="bg-slate-100 border-none rounded-l-xl px-4 flex-1 focus:ring-1 focus:ring-emerald-500/30 text-sm outline-none">
+                    <button
+                        class="bg-green-700 text-white px-5 rounded-r-xl hover:bg-emerald-800 transition-colors flex items-center justify-center">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="border-t border-white/5 py-8 text-center text-gray-600 text-sm">
+            <p>&copy; 2026 FreshMart Supermarket. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/utils/utils.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            utils.initNavbar();
+            initContactMap();
+
+            // Persist form fields
+            utils.persistField('name');
+            utils.persistField('email');
+            utils.persistField('message');
+        });
+
+        function initContactMap() {
+            const hqLocation = [13.0827, 80.2707]; // Chennai Store HQ
+            const mapElement = document.getElementById("contact-map");
+
+            if (mapElement && typeof L !== 'undefined') {
+                const map = L.map('contact-map', { scrollWheelZoom: false }).setView(hqLocation, 15);
+
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                    maxZoom: 19,
+                    attribution: '© OpenStreetMap'
+                }).addTo(map);
+
+                const storeIcon = L.icon({
+                    iconUrl: 'https://cdn-icons-png.flaticon.com/512/6122/6122119.png', // Delivery store icon
+                    iconSize: [50, 50],
+                    iconAnchor: [25, 50],
+                    popupAnchor: [0, -45]
+                });
+
+                L.marker(hqLocation, { icon: storeIcon }).addTo(map)
+                    .bindPopup("<div class='p-2 font-bold text-center text-emerald-600'><i class='fas fa-leaf mr-2'></i>FreshMart HQ<br><span class='text-[10px] text-slate-400'>Chennai, Organic Hub</span></div>")
+                    .openPopup();
+            }
+        }
+
+        document.getElementById('contact-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            // Mock success
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerHTML;
+
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Sending...</span>';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                utils.showToast('Message sent! Our team will contact you soon.');
+                e.target.reset();
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 1500);
+        });
+    </script>
+    <!-- Mobile Menu Drawer -->
+    <div id="mobile-menu"
+        class="hidden fixed inset-0 z-[1000] bg-emerald-900/60 backdrop-blur-md transition-all duration-500">
+        <div
+            class="bg-gradient-to-b from-white via-white to-emerald-50 w-3/4 h-full p-6 flex flex-col border-r border-emerald-100/50 shadow-[20px_0_40px_rgba(0,0,0,0.1)] overflow-y-auto">
+            <div class="flex items-center justify-between mb-8 pb-4 border-b">
+                <span class="text-xl font-bold text-emerald-800 flex items-center gap-2">
+                    <i class="fas fa-leaf text-emerald-600"></i> Menu
+                </span>
+                <button onclick="document.getElementById('mobile-menu').classList.add('hidden')" class="text-slate-400 hover:text-emerald-600"><i
+                        class="fas fa-times text-2xl"></i></button>
+            </div>
+            <nav class="flex flex-col space-y-4 text-lg font-medium text-slate-600">
+                <a href="/index.html" class="hover:text-emerald-600 py-1 transition-colors">Home</a>
+                <a href="/index2.html" class="hover:text-emerald-600 py-1 transition-colors">Home 2</a>
+                <a href="/about.html" class="hover:text-emerald-600 py-1 transition-colors">About</a>
+                <a href="/shop.html" class="hover:text-emerald-600 py-1 transition-colors">Products</a>
+                <a href="/tracking.html" class="hover:text-emerald-600 py-1 transition-colors">Track Order</a>
+
+                <a href="/contact.html" class="text-emerald-600 font-bold py-1 transition-colors leading-tight">Contact</a>
+                <a href="/auth.html" id="mobile-nav-login"
+                    class="hover:text-emerald-600 py-1 transition-colors">Login/Register</a>
+                <a href="/dashboard.html" id="mobile-nav-dash"
+                    class="hover:text-emerald-600 py-1 transition-colors hidden">Dashboard</a>
+                <button id="mobile-nav-logout" onclick="utils.logout()"
+                    class="hidden text-left text-red-500 py-1 transition-colors font-bold mt-4 pt-4 border-t border-slate-300/50/60">Sign
+                    Out</button>
+            </nav>
+
+        </div>
+    </div>
+</body>
+
+</html>

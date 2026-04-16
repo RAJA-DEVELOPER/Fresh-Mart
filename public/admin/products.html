@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Products - FreshMart Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body>
+    <div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <aside id="admin-sidebar">
+        <div class="sidebar-logo">
+            <i class="fas fa-leaf" style="color:#34d399;font-size:1.4rem"></i>
+            <span>FreshMart <span class="badge">ADMIN</span></span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/admin/index.html" class="nav-item" data-page="index"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
+            <a href="/admin/products.html" class="nav-item active" data-page="products"><i class="fas fa-box"></i><span>Products</span></a>
+            <a href="/admin/orders.html" class="nav-item" data-page="orders"><i class="fas fa-shopping-cart"></i><span>Orders</span></a>
+            <a href="/admin/customers.html" class="nav-item" data-page="customers"><i class="fas fa-users"></i><span>Customers</span></a>
+            <a href="/admin/coupons.html" class="nav-item" data-page="coupons"><i class="fas fa-ticket-alt"></i><span>Coupons</span></a>
+            <a href="/admin/delivery.html" class="nav-item" data-page="delivery"><i class="fas fa-truck-fast"></i><span>Delivery</span></a>
+            <a href="/admin/reports.html" class="nav-item" data-page="reports"><i class="fas fa-chart-bar"></i><span>Reports</span></a>
+        </nav>
+        <div class="sidebar-footer">
+            <button onclick="logout()"><i class="fas fa-power-off"></i><span>Sign Out</span></button>
+        </div>
+    </aside>
+
+    <div id="admin-main">
+        <div class="admin-topbar">
+            <button id="hamburger-btn" onclick="openSidebar()"><i class="fas fa-bars"></i></button>
+            <div class="logo-text"><i class="fas fa-leaf" style="color:#059669"></i> FreshMart Admin</div>
+            <button class="btn-primary" onclick="openModal('add')" style="padding:8px 14px;font-size:0.8rem"><i class="fas fa-plus"></i></button>
+        </div>
+
+        <div class="admin-content">
+            <div class="page-header">
+                <div>
+                    <h1>Inventory Management</h1>
+                    <p>Add, update and manage your supermarket products.</p>
+                </div>
+                <button class="btn-primary desktop-only" onclick="openModal('add')"><i class="fas fa-plus"></i> Add Product</button>
+            </div>
+
+            <div class="filter-bar">
+                <div class="search-wrap">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="product-search" placeholder="Search by name or category...">
+                </div>
+                <select id="category-filter">
+                    <option value="">All Categories</option>
+                </select>
+            </div>
+
+            <div class="table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Status</th>
+                            <th style="text-align:right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="product-table-body" class="desktop-table">
+                        <tr><td colspan="6" style="text-align:center;padding:60px;color:#94a3b8;font-style:italic">Loading inventory...</td></tr>
+                    </tbody>
+                </table>
+                <div id="product-cards" class="mobile-cards"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div id="product-modal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+            <h2 id="modal-title" class="modal-title">Add New Product</h2>
+            <form id="product-form" class="form-grid">
+                <input type="hidden" id="prod-id">
+                <div class="form-group col-span-2">
+                    <label class="form-label">Product Name</label>
+                    <input type="text" id="prod-name" required class="form-input" placeholder="e.g. Organic Tomatoes">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <select id="prod-category" required class="form-input"></select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Unit (e.g. 1kg)</label>
+                    <input type="text" id="prod-unit" required class="form-input" placeholder="500g">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Price (₹)</label>
+                    <input type="number" id="prod-price" required step="0.01" class="form-input" placeholder="0.00">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Stock Qty</label>
+                    <input type="number" id="prod-stock" required class="form-input" placeholder="0">
+                </div>
+                <div class="form-group col-span-2">
+                    <label class="form-label">Image URL</label>
+                    <input type="text" id="prod-image" class="form-input" placeholder="https://...">
+                </div>
+                <div class="col-span-2" style="display:flex;gap:12px;margin-top:8px">
+                    <button type="submit" class="btn-primary" style="flex:1;justify-content:center;padding:14px">Save Product</button>
+                    <button type="button" onclick="closeModal()" style="background:none;border:none;color:#94a3b8;font:700 0.9rem 'Plus Jakarta Sans',sans-serif;cursor:pointer;padding:14px">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/utils/utils.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            isAdmin();
+            loadCategories();
+            loadProducts();
+            document.getElementById('product-search').addEventListener('input', e => loadProducts(e.target.value));
+            document.getElementById('category-filter').addEventListener('change', e => loadProducts('', e.target.value));
+        });
+
+        function openSidebar() { document.getElementById('admin-sidebar').classList.add('open'); document.getElementById('sidebar-overlay').classList.add('show'); }
+        function closeSidebar() { document.getElementById('admin-sidebar').classList.remove('open'); document.getElementById('sidebar-overlay').classList.remove('show'); }
+
+        function isAdmin() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (!localStorage.getItem('token') || user.role !== 'admin') { localStorage.clear(); window.location.href = '/auth.html'; }
+        }
+
+        async function loadCategories() {
+            try {
+                const res = await api.get('/categories');
+                const opts = res.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+                document.getElementById('category-filter').innerHTML += opts;
+                document.getElementById('prod-category').innerHTML = opts;
+            } catch (e) { console.error(e); }
+        }
+
+        async function loadProducts(search = '', category_id = '') {
+            try {
+                const q = new URLSearchParams({ search, category_id }).toString();
+                const res = await api.get(`/products?${q}`);
+                const tbody = document.getElementById('product-table-body');
+                const cards = document.getElementById('product-cards');
+
+                if (res.products.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:60px;color:#94a3b8">No products found.</td></tr>';
+                    cards.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8">No products found.</div>';
+                    return;
+                }
+
+                tbody.innerHTML = res.products.map(p => `
+                    <tr>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:12px">
+                                <img src="${p.image_url || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=40'}" style="width:40px;height:40px;border-radius:10px;object-fit:cover;background:#f8fafc">
+                                <div>
+                                    <div style="font-weight:700;color:#1e293b">${p.name}</div>
+                                    <div style="font-size:11px;color:#94a3b8">${p.unit}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="color:#64748b;font-size:0.875rem">${p.category_name}</td>
+                        <td style="font-weight:800;color:#1e293b">${utils.formatCurrency(p.price)}</td>
+                        <td style="font-weight:700;color:${p.stock < 10 ? '#ef4444' : '#475569'}">${p.stock}</td>
+                        <td><span class="badge ${p.is_active ? 'badge-green' : 'badge-gray'}">${p.is_active ? 'Active' : 'Inactive'}</span></td>
+                        <td style="text-align:right">
+                            <button class="btn-ghost" onclick='openModal("edit", ${JSON.stringify(p)})'><i class="fas fa-edit"></i></button>
+                            <button class="btn-ghost danger" onclick="deleteProduct(${p.id})"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    </tr>
+                `).join('');
+
+                cards.innerHTML = res.products.map(p => `
+                    <div class="data-card">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+                            <img src="${p.image_url || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=40'}" style="width:48px;height:48px;border-radius:12px;object-fit:cover">
+                            <div style="flex:1">
+                                <div style="font-weight:700;color:#1e293b">${p.name}</div>
+                                <div style="font-size:11px;color:#94a3b8">${p.category_name} · ${p.unit}</div>
+                            </div>
+                            <span class="badge ${p.is_active ? 'badge-green' : 'badge-gray'}">${p.is_active ? 'Active' : 'Inactive'}</span>
+                        </div>
+                        <div class="data-card-row">
+                            <span style="font-weight:800;color:#059669;font-size:1rem">${utils.formatCurrency(p.price)}</span>
+                            <span style="font-weight:700;color:${p.stock < 10 ? '#ef4444' : '#475569'};font-size:0.875rem">${p.stock} in stock</span>
+                        </div>
+                        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px;border-top:1px solid #f1f5f9;padding-top:10px">
+                            <button class="btn-ghost" onclick='openModal("edit", ${JSON.stringify(p)})'><i class="fas fa-edit"></i> Edit</button>
+                            <button class="btn-ghost danger" onclick="deleteProduct(${p.id})"><i class="fas fa-trash-alt"></i> Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) { console.error('Error loading products', e); }
+        }
+
+        function openModal(mode, product = null) {
+            document.getElementById('product-modal').classList.remove('hidden');
+            document.getElementById('modal-title').innerText = mode === 'add' ? 'Add New Product' : 'Edit Product';
+            if (mode === 'add') {
+                document.getElementById('product-form').reset();
+                document.getElementById('prod-id').value = '';
+            } else {
+                document.getElementById('prod-id').value = product.id;
+                document.getElementById('prod-name').value = product.name;
+                document.getElementById('prod-category').value = product.category_id;
+                document.getElementById('prod-unit').value = product.unit;
+                document.getElementById('prod-price').value = product.price;
+                document.getElementById('prod-stock').value = product.stock;
+                document.getElementById('prod-image').value = product.image_url || '';
+            }
+        }
+
+        function closeModal() { document.getElementById('product-modal').classList.add('hidden'); }
+
+        document.getElementById('product-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            const id = document.getElementById('prod-id').value;
+            const data = {
+                name: document.getElementById('prod-name').value,
+                category_id: document.getElementById('prod-category').value,
+                unit: document.getElementById('prod-unit').value,
+                price: parseFloat(document.getElementById('prod-price').value),
+                stock: parseInt(document.getElementById('prod-stock').value),
+                image_url: document.getElementById('prod-image').value
+            };
+            try {
+                if (id) await api.put(`/products/${id}`, data);
+                else await api.post('/products', data);
+                utils.showToast(id ? 'Product updated!' : 'Product added!');
+                closeModal();
+                loadProducts();
+            } catch (err) { utils.showToast(err.message, 'error'); }
+        });
+
+        async function deleteProduct(id) {
+            const confirmed = await utils.showConfirm('Delete Product', 'Are you sure you want to permanently delete this product?');
+            if (!confirmed) return;
+            try {
+                await api.delete(`/products/${id}`);
+                utils.showToast('Product deleted');
+                loadProducts();
+            } catch (err) { utils.showToast(err.message, 'error'); }
+        }
+
+        function logout() { localStorage.clear(); window.location.href = '/auth.html'; }
+    </script>
+</body>
+</html>

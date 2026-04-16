@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Reports - FreshMart Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body>
+    <div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <aside id="admin-sidebar">
+        <div class="sidebar-logo">
+            <i class="fas fa-leaf" style="color:#34d399;font-size:1.4rem"></i>
+            <span>FreshMart <span class="badge">ADMIN</span></span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/admin/index.html" class="nav-item"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
+            <a href="/admin/products.html" class="nav-item"><i class="fas fa-box"></i><span>Products</span></a>
+            <a href="/admin/orders.html" class="nav-item"><i class="fas fa-shopping-cart"></i><span>Orders</span></a>
+            <a href="/admin/customers.html" class="nav-item"><i class="fas fa-users"></i><span>Customers</span></a>
+            <a href="/admin/coupons.html" class="nav-item"><i class="fas fa-ticket-alt"></i><span>Coupons</span></a>
+            <a href="/admin/delivery.html" class="nav-item"><i class="fas fa-truck-fast"></i><span>Delivery</span></a>
+            <a href="/admin/reports.html" class="nav-item active"><i class="fas fa-chart-bar"></i><span>Reports</span></a>
+        </nav>
+        <div class="sidebar-footer">
+            <button onclick="logout()"><i class="fas fa-power-off"></i><span>Sign Out</span></button>
+        </div>
+    </aside>
+
+    <div id="admin-main">
+        <div class="admin-topbar">
+            <button id="hamburger-btn" onclick="openSidebar()"><i class="fas fa-bars"></i></button>
+            <div class="logo-text"><i class="fas fa-leaf" style="color:#059669"></i> FreshMart Admin</div>
+            <div style="width:32px;height:32px;border-radius:10px;background:#059669;display:flex;align-items:center;justify-content:center;color:#fff"><i class="fas fa-chart-bar"></i></div>
+        </div>
+
+        <div class="admin-content">
+            <!-- Header with period tabs -->
+            <div class="page-header">
+                <div>
+                    <h1>Operational Reports</h1>
+                    <p>Analyze your sales performance and product trends.</p>
+                </div>
+                <!-- Period selector: scrollable on mobile -->
+                <div class="tabs-container">
+                    <button onclick="loadReports('daily')" class="tab-btn active" data-period="daily">Daily</button>
+                    <button onclick="loadReports('weekly')" class="tab-btn" data-period="weekly">Weekly</button>
+                    <button onclick="loadReports('monthly')" class="tab-btn" data-period="monthly">Monthly</button>
+                </div>
+            </div>
+
+            <!-- Summary KPI row -->
+            <div class="stats-grid" id="report-kpis">
+                <div class="stat-card">
+                    <div class="stat-label">Gross Revenue</div>
+                    <div class="stat-value" id="rep-revenue" style="color:#059669">₹0.00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Orders</div>
+                    <div class="stat-value" id="rep-orders">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Avg Order Value</div>
+                    <div class="stat-value" id="rep-avg">₹0.00</div>
+                </div>
+            </div>
+
+            <!-- Sales detail + Top Products -->
+            <div class="panel-grid">
+                <!-- Sales breakdown -->
+                <div class="panel">
+                    <h3 class="panel-title">Sales Performance</h3>
+                    <div id="sales-report-content">
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #f1f5f9">
+                            <span style="color:#64748b;font-weight:500">Gross Revenue</span>
+                            <span id="rep-revenue-2" style="font-size:1.5rem;font-weight:800;color:#059669">₹0.00</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #f1f5f9">
+                            <span style="color:#64748b;font-weight:500">Total Orders</span>
+                            <span id="rep-orders-2" style="font-size:1.5rem;font-weight:800;color:#1e293b">0</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0">
+                            <span style="color:#64748b;font-weight:500">Average Order Value</span>
+                            <span id="rep-avg-2" style="font-size:1.5rem;font-weight:800;color:#1e293b">₹0.00</span>
+                        </div>
+                    </div>
+
+                    <!-- Visual bar progress -->
+                    <div style="margin-top:20px;padding:20px;background:#f8fafc;border-radius:16px">
+                        <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#94a3b8;margin-bottom:12px">Revenue Bar</div>
+                        <div style="height:8px;background:#e2e8f0;border-radius:8px;overflow:hidden">
+                            <div id="revenue-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#059669,#34d399);border-radius:8px;transition:width 1s ease"></div>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:#94a3b8">
+                            <span>₹0</span>
+                            <span id="bar-max">₹0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Products -->
+                <div class="panel">
+                    <h3 class="panel-title">Top Selling Products</h3>
+                    <div id="top-products-list" class="list-container">
+                        <div style="height:48px;background:#f8fafc;border-radius:12px;animation:pulse 1.5s infinite"></div>
+                        <div style="height:48px;background:#f8fafc;border-radius:12px;animation:pulse 1.5s infinite"></div>
+                        <div style="height:48px;background:#f8fafc;border-radius:12px;animation:pulse 1.5s infinite"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+
+        @media (max-width: 640px) {
+            #report-kpis { grid-template-columns: 1fr 1fr; }
+            #report-kpis .stat-card:last-child { grid-column: span 2; }
+        }
+    </style>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/utils/utils.js"></script>
+    <script>
+        let socket, currentPeriod = 'daily';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            isAdmin();
+            loadReports('daily');
+            initSocket();
+        });
+
+        function openSidebar() { document.getElementById('admin-sidebar').classList.add('open'); document.getElementById('sidebar-overlay').classList.add('show'); }
+        function closeSidebar() { document.getElementById('admin-sidebar').classList.remove('open'); document.getElementById('sidebar-overlay').classList.remove('show'); }
+
+        function isAdmin() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (!localStorage.getItem('token') || user.role !== 'admin') { localStorage.clear(); window.location.href = '/auth.html'; }
+        }
+
+        function initSocket() {
+            socket = io();
+            socket.emit('join_admin');
+            socket.on('NEW_ORDER', () => loadReports(currentPeriod));
+            socket.on('ORDER_STATUS_UPDATE', () => loadReports(currentPeriod));
+        }
+
+        async function loadReports(period) {
+            currentPeriod = period;
+            // Update tab styles
+            document.querySelectorAll('.tab-btn').forEach(t => {
+                const isActive = t.dataset.period === period;
+                t.classList.toggle('active', isActive);
+            });
+
+            try {
+                const [salesRes, productsRes] = await Promise.all([
+                    api.get(`/admin/reports/sales?period=${period}`),
+                    api.get(`/admin/reports/products?period=${period}`)
+                ]);
+
+                const stats = salesRes.report[0] || { total_revenue: 0, order_count: 0 };
+                const revenue = parseFloat(stats.total_revenue) || 0;
+                const orders = parseInt(stats.order_count) || 0;
+                const avg = orders > 0 ? revenue / orders : 0;
+
+                // Update KPI cards
+                ['rep-revenue','rep-revenue-2'].forEach(id => document.getElementById(id).innerText = utils.formatCurrency(revenue));
+                ['rep-orders','rep-orders-2'].forEach(id => document.getElementById(id).innerText = orders);
+                ['rep-avg','rep-avg-2'].forEach(id => document.getElementById(id).innerText = utils.formatCurrency(avg));
+
+                // Revenue bar (relative to a 100k target)
+                const target = Math.max(revenue * 1.2, 10000);
+                document.getElementById('revenue-bar').style.width = Math.min((revenue / target) * 100, 100) + '%';
+                document.getElementById('bar-max').innerText = utils.formatCurrency(target);
+
+                // Top products
+                const topList = document.getElementById('top-products-list');
+                if (productsRes.report.length === 0) {
+                    topList.innerHTML = '<p style="color:#94a3b8;text-align:center;padding:20px">No product data for this period.</p>';
+                } else {
+                    const maxQty = productsRes.report[0]?.total_qty || 1;
+                    topList.innerHTML = productsRes.report.slice(0, 6).map((p, i) => `
+                        <div class="list-row" style="padding: 10px 0; border: none; background: none; box-shadow: none; border-radius: 0; ${i < productsRes.report.slice(0,6).length-1 ? 'border-bottom:1px solid #f1f5f9' : ''}">
+                            <div class="list-row-info">
+                                <div style="width:28px;height:28px;background:${i === 0 ? '#fef9c3' : '#f8fafc'};border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.8rem;color:${i === 0 ? '#ca8a04' : '#94a3b8'};flex-shrink:0">${i+1}</div>
+                                <div style="flex:1;min-width:0">
+                                    <div class="list-row-title" style="font-size: 0.95rem;">${p.name}</div>
+                                    <div style="height:4px;background:#f1f5f9;border-radius:4px;margin-top:6px;overflow:hidden">
+                                        <div style="height:100%;width:${Math.round((p.total_qty/maxQty)*100)}%;background:linear-gradient(90deg,#059669,#34d399);border-radius:4px;transition:width 0.8s ease"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <span style="font-weight:800;color:#059669;font-size:0.85rem;flex-shrink:0">${p.total_qty} units</span>
+                        </div>
+                    `).join('');
+                }
+
+            } catch (e) { console.error('Error loading reports', e); }
+        }
+
+        function logout() { localStorage.clear(); window.location.href = '/auth.html'; }
+    </script>
+</body>
+</html>

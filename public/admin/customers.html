@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Customers - FreshMart Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body>
+    <div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <aside id="admin-sidebar">
+        <div class="sidebar-logo">
+            <i class="fas fa-leaf" style="color:#34d399;font-size:1.4rem"></i>
+            <span>FreshMart <span class="badge">ADMIN</span></span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/admin/index.html" class="nav-item" data-page="index"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
+            <a href="/admin/products.html" class="nav-item" data-page="products"><i class="fas fa-box"></i><span>Products</span></a>
+            <a href="/admin/orders.html" class="nav-item" data-page="orders"><i class="fas fa-shopping-cart"></i><span>Orders</span></a>
+            <a href="/admin/customers.html" class="nav-item active" data-page="customers"><i class="fas fa-users"></i><span>Customers</span></a>
+            <a href="/admin/coupons.html" class="nav-item" data-page="coupons"><i class="fas fa-ticket-alt"></i><span>Coupons</span></a>
+            <a href="/admin/delivery.html" class="nav-item" data-page="delivery"><i class="fas fa-truck-fast"></i><span>Delivery</span></a>
+            <a href="/admin/reports.html" class="nav-item" data-page="reports"><i class="fas fa-chart-bar"></i><span>Reports</span></a>
+        </nav>
+        <div class="sidebar-footer">
+            <button onclick="logout()"><i class="fas fa-power-off"></i><span>Sign Out</span></button>
+        </div>
+    </aside>
+
+    <div id="admin-main">
+        <div class="admin-topbar">
+            <button id="hamburger-btn" onclick="openSidebar()"><i class="fas fa-bars"></i></button>
+            <div class="logo-text"><i class="fas fa-leaf" style="color:#059669"></i> FreshMart Admin</div>
+            <div style="width:32px;height:32px;border-radius:10px;background:#059669;display:flex;align-items:center;justify-content:center;color:#fff"><i class="fas fa-users"></i></div>
+        </div>
+
+        <div class="admin-content">
+            <div class="page-header">
+                <div>
+                    <h1>Customer Directory</h1>
+                    <p>View and manage your registered supermarket members.</p>
+                </div>
+                <div id="customer-count" style="background:#fff;border-radius:16px;padding:12px 20px;border:1px solid #f1f5f9;box-shadow:0 2px 8px rgba(0,0,0,0.04);font-weight:800;color:#1e293b;font-size:1.1rem">
+                    -- Members
+                </div>
+            </div>
+
+            <div class="filter-bar">
+                <div class="search-wrap" style="flex:1">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="cust-search" placeholder="Search by name, email or mobile...">
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Mobile</th>
+                            <th>Joined</th>
+                            <th>Orders</th>
+                            <th style="text-align:right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customer-table-body" class="desktop-table">
+                        <tr><td colspan="6" style="text-align:center;padding:60px;color:#94a3b8">Loading customers...</td></tr>
+                    </tbody>
+                </table>
+                <div id="customer-cards" class="mobile-cards"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/utils/utils.js"></script>
+    <script>
+        let allCustomers = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            isAdmin();
+            loadCustomers();
+            document.getElementById('cust-search').addEventListener('input', e => applyFilter(e.target.value));
+        });
+
+        function openSidebar() { document.getElementById('admin-sidebar').classList.add('open'); document.getElementById('sidebar-overlay').classList.add('show'); }
+        function closeSidebar() { document.getElementById('admin-sidebar').classList.remove('open'); document.getElementById('sidebar-overlay').classList.remove('show'); }
+
+        function isAdmin() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (!localStorage.getItem('token') || user.role !== 'admin') { localStorage.clear(); window.location.href = '/auth.html'; }
+        }
+
+        async function loadCustomers() {
+            try {
+                const res = await api.get('/admin/customers');
+                allCustomers = res.customers;
+                document.getElementById('customer-count').innerText = `${allCustomers.length} Members`;
+                applyFilter('');
+            } catch (e) { console.error('Error loading customers', e); }
+        }
+
+        function applyFilter(search) {
+            const s = search.toLowerCase();
+            const list = s
+                ? allCustomers.filter(c =>
+                    (c.name && c.name.toLowerCase().includes(s)) ||
+                    (c.email && c.email.toLowerCase().includes(s)) ||
+                    (c.mobile && c.mobile.includes(s)))
+                : allCustomers;
+            renderCustomers(list);
+        }
+
+        function renderCustomers(customers) {
+            const tbody = document.getElementById('customer-table-body');
+            const cards = document.getElementById('customer-cards');
+
+            if (customers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:60px;color:#94a3b8">No customers found.</td></tr>';
+                cards.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8">No customers found.</div>';
+                return;
+            }
+
+            tbody.innerHTML = customers.map(c => `
+                <tr>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:12px">
+                            <div style="width:38px;height:38px;border-radius:12px;background:#f0fdf4;color:#059669;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.9rem;flex-shrink:0">
+                                ${(c.name || 'U').charAt(0).toUpperCase()}
+                            </div>
+                            <span style="font-weight:700;color:#1e293b">${c.name}</span>
+                        </div>
+                    </td>
+                    <td style="color:#64748b;font-size:0.875rem">${c.email || '—'}</td>
+                    <td style="color:#64748b;font-size:0.875rem">${c.mobile || '—'}</td>
+                    <td style="color:#94a3b8;font-size:0.875rem">${new Date(c.created_at).toLocaleDateString()}</td>
+                    <td><span style="font-weight:800;color:#059669">${c.order_count || 0}</span></td>
+                    <td style="text-align:right">
+                        <button class="btn-ghost danger" title="Block user"><i class="fas fa-ban"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+
+            cards.innerHTML = customers.map(c => `
+                <div class="data-card">
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+                        <div style="width:44px;height:44px;border-radius:14px;background:#f0fdf4;color:#059669;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;flex-shrink:0">
+                            ${(c.name || 'U').charAt(0).toUpperCase()}
+                        </div>
+                        <div style="flex:1">
+                            <div style="font-weight:700;color:#1e293b">${c.name}</div>
+                            <div style="font-size:0.78rem;color:#94a3b8">Joined ${new Date(c.created_at).toLocaleDateString()}</div>
+                        </div>
+                        <span style="font-weight:800;color:#059669;font-size:0.9rem">${c.order_count || 0} orders</span>
+                    </div>
+                    <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:0.8rem;color:#64748b;border-top:1px solid #f1f5f9;padding-top:10px;overflow:hidden;">
+                        ${c.email ? `<span style="word-break: break-all; max-width: 100%;"><i class="fas fa-envelope" style="color:#94a3b8;margin-right:4px"></i>${c.email}</span>` : ''}
+                        ${c.mobile ? `<span style="word-break: break-all; max-width: 100%;"><i class="fas fa-phone" style="color:#94a3b8;margin-right:4px"></i>${c.mobile}</span>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function logout() { localStorage.clear(); window.location.href = '/auth.html'; }
+    </script>
+</body>
+</html>

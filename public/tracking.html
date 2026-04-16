@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Order - FreshMart</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .step-active {
+            background-color: #059669;
+            border-color: #10b981;
+        }
+
+        .step-inactive {
+            background-color: #e5e7eb;
+            border-color: #f3f4f6;
+        }
+
+        /* Premium Global Scrollbar and Selection */
+        ::selection {
+            background: #a7f3d0;
+            /* emerald-200 */
+            color: #064e3b;
+            /* emerald-900 */
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f8fafc;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .premium-glass {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+    <link rel="stylesheet" href="/css/global.css">
+</head>
+
+<body class="bg-stone-50 min-h-screen text-gray-900 antialiased">
+
+    <!-- Header -->
+    <header class="fixed top-0 left-0 w-full top-0 z-50 bg-white/80 backdrop-blur-2xl border-b border-emerald-100/60 shadow-sm shadow-emerald-500/10">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <!-- Logo -->
+            <a href="/" class="flex items-center space-x-2 shrink-0">
+                <div class="w-10 h-10 bg-green-700 rounded-xl flex items-center justify-center text-white text-xl ">
+                    <i class="fas fa-leaf"></i>
+                </div>
+                <span class="text-2xl font-black tracking-tight text-stone-900 hidden sm:block">FreshMart</span>
+            </a>
+
+            <!-- Search bar -->
+            <div class="hidden lg:flex flex-1 max-w-lg mx-4">
+                <div class="relative w-full">
+                    <input type="text" id="main-search" placeholder="Search products..."
+                        class="w-full bg-emerald-50/80 border border-emerald-200/60 rounded-full py-2.5 px-4 pl-10 focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 focus:bg-white outline-none transition-all duration-300 text-sm font-medium placeholder:text-gray-400">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                </div>
+            </div>
+
+            <!-- Desktop Navigation -->
+            <nav class="hidden xl:flex items-center space-x-6 mx-4 text-sm font-semibold text-gray-600">
+                <a href="/index.html"
+                    class="hover:text-emerald-600 transition-colors">Home</a>
+                <a href="/about.html"
+                    class="hover:text-emerald-600 transition-colors">About</a>
+                <a href="/shop.html"
+                    class="hover:text-emerald-600 transition-colors">Products</a>
+                <a href="/tracking.html" class="text-emerald-600 font-bold">Track Order</a>
+                <a href="/contact.html"
+                    class="hover:text-emerald-600 transition-colors">Contact</a>
+                <a href="/auth.html" id="nav-login" class="hover:text-emerald-600 transition-colors flex items-center"
+                    title="Login / Register"><i class="fas fa-user-circle text-[1.35rem]"></i></a>
+                <a href="/dashboard.html" id="nav-dash"
+                    class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 font-semibold hover:bg-emerald-100 transition-all duration-200 hidden">Dashboard</a>
+            </nav>
+
+            <!-- Actions -->
+            <div class="flex items-center space-x-3">
+                <button id="nav-logout" onclick="utils.logout()"
+                    class="hidden xl:flex text-gray-400 hover:text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-xl transition-all duration-200 text-sm font-bold items-center gap-2 mr-2">
+                    <i class="fas fa-sign-out-alt mr-2"></i><span>Sign Out</span>
+                </button>
+                <a href="/cart.html" class="relative p-2 group">
+                    <i
+                        class="fas fa-shopping-basket text-xl text-gray-600 group-hover:text-emerald-600 transition-all duration-200"></i>
+                    <span id="cart-badge"
+                        class="absolute -top-1.5 -right-1.5 bg-green-700 text-white text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center hidden ring-2 ring-white ">0</span>
+                </a>
+                <button id="mobile-menu-btn" class="xl:hidden w-10 h-10 flex items-center justify-center bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition-all duration-200">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+
+                <!-- Mobile Search Bar (Visible only on lg and down) -->
+        <div class="lg:hidden px-4 pb-3 w-full">
+            <div class="relative w-full">
+                <input type="text" id="mobile-search" placeholder="Search your daily essentials..."
+                    class="w-full bg-emerald-50/80 border border-emerald-200/60 rounded-[1.25rem] py-2 px-4 pl-10 focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 focus:bg-white outline-none transition-all duration-300 text-sm font-medium placeholder:text-gray-400">
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-emerald-600/50 text-xs"></i>
+            </div>
+        </div>
+
+        
+    </header>
+
+    <main class="container mx-auto px-4 py-12 max-w-4xl">
+        <div id="tracking-content" class="space-y-8">
+            <!-- Loading Skeletons -->
+            <div class="animate-pulse bg-white rounded-3xl h-64 shadow-[0_8px_30px_rgb(0,0,0,0.04)]"></div>
+        </div>
+    </main>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <footer class="bg-white pt-16 mt-24">
+        <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-12 gap-x-12 pb-12 text-center md:text-left">
+            <div class="flex flex-col items-center md:items-start">
+                <a href="/" class="flex items-center justify-center md:justify-start space-x-2 mb-6">
+                    <div
+                        class="w-10 h-10 bg-green-700 shadow-[0_10px_40px_rgb(0,0,0,0.06)] shadow-emerald-500/20 rounded flex items-center justify-center text-white">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <span class="text-xl font-black text-stone-900 tracking-tight">FreshMart</span>
+                </a>
+                <p class="text-gray-400 leading-relaxed text-sm max-w-xs">Your neighborhood's favorite grocery store, now online.
+                    We deliver freshness to your doorstep within hours.</p>
+            </div>
+            <div class="flex flex-col items-center md:items-start">
+                <h4 class="font-bold mb-6 text-stone-900 text-sm tracking-widest uppercase">Quick Links</h4>
+                <ul class="space-y-3 text-gray-400 text-sm">
+                    <li><a href="/index.html" class="hover:text-emerald-600 transition-colors">Home</a></li>
+                    <li><a href="/index2.html" class="hover:text-emerald-600 transition-colors">Home 2</a></li>
+                    <li><a href="/about.html" class="hover:text-emerald-600 transition-colors">About Us</a></li>
+                    <li><a href="/shop.html" class="hover:text-emerald-600 transition-colors">Products</a></li>
+                    <li><a href="/cart.html" class="hover:text-emerald-600 transition-colors">My Cart</a></li>
+                    <li><a href="/tracking.html" class="hover:text-emerald-600 transition-colors">Track Order</a></li>
+                </ul>
+            </div>
+            <div class="flex flex-col items-center md:items-start">
+                <h4 class="font-bold mb-6 text-stone-900 text-sm tracking-widest uppercase">Support</h4>
+                <ul class="space-y-3 text-gray-400 text-sm">
+                    <li><a href="/contact.html" class="hover:text-emerald-600 transition-colors">Contact Support</a></li>
+                    <li><a href="/faq.html" class="hover:text-emerald-600 transition-colors">FAQs</a></li>
+                    <li><a href="/privacy.html" class="hover:text-emerald-600 transition-colors">Privacy Policy</a></li>
+                    <li><a href="/terms.html" class="hover:text-emerald-600 transition-colors">Terms of Service</a></li>
+                </ul>
+            </div>
+            <div class="flex flex-col items-center md:items-start">
+                <h4 class="font-bold mb-6 text-stone-900 text-sm tracking-widest uppercase">Newsletter</h4>
+                <p class="text-gray-400 mb-6 text-sm">Get the latest offers and fresh updates.</p>
+                <div class="flex h-12 w-full max-w-sm">
+                    <input type="email" placeholder="Your email"
+                        class="bg-slate-100 border-none rounded-l-xl px-4 flex-1 focus:ring-1 focus:ring-emerald-500/30 text-sm outline-none">
+                    <button
+                        class="bg-green-700 text-white px-5 rounded-r-xl hover:bg-emerald-800 transition-colors flex items-center justify-center">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="border-t border-white/5 py-8 text-center text-gray-600 text-sm">
+            <p>&copy; 2026 FreshMart Supermarket. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/utils/utils.js"></script>
+    <script>
+        let socket;
+        document.addEventListener('DOMContentLoaded', () => {
+            utils.initNavbar();
+            loadOrderTracking();
+            initSocket();
+        });
+
+        function initSocket() {
+            const user = utils.getUser();
+            if (!user || !user.id) return;
+
+            socket = io();
+            socket.on(`NOTIFICATION_${user.id}`, (data) => {
+                if (data.type === 'DELIVERY_UPDATE' || data.type === 'STATUS_UPDATE') {
+                    utils.showToast(data.message);
+                    loadOrderTracking(); // Live refresh of the stepper
+                }
+            });
+        }
+
+        async function loadOrderTracking() {
+            const id = utils.getQueryParam('id');
+            if (!id) {
+                window.location.href = '/dashboard.html';
+                return;
+            }
+
+            try {
+                // In our current backend, order details can be fetched by ID
+                const res = await api.get(`/orders/${id}`);
+                const order = res.order;
+                const container = document.getElementById('tracking-content');
+
+                container.innerHTML = `
+                    <!-- Order Info Header -->
+                    <div class="bg-white p-6 md:p-12 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-300/50/60 flex flex-col md:flex-row md:items-center justify-between">
+                        <div class="space-y-2">
+                             <span class="text-emerald-600 font-bold tracking-widest text-xs uppercase">Tracking Order</span>
+                             <h1 class="text-4xl font-extrabold text-slate-800">#FM-${order.id}</h1>
+                             <p class="text-slate-400 font-medium">Placed on ${new Date(order.created_at).toLocaleString()}</p>
+                        </div>
+                        <div class="mt-8 md:mt-0 text-right">
+                             <div class="text-3xl font-extrabold text-emerald-600 mb-1">${utils.formatCurrency(order.final_amount)}</div>
+                             <div class="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full inline-block text-xs font-bold">${(order.status || 'PLACED').toUpperCase()}</div>
+                        </div>
+                    </div>
+
+                    <!-- Live Tracking Map -->
+                    <div class="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-300/50/60 mb-8">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-bold text-slate-800">Live Location</h3>
+                            <span class="text-xs text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full font-bold flex items-center space-x-2"><i class="fas fa-satellite-dish animate-pulse"></i> <span>Live</span></span>
+                        </div>
+                        <div id="tracking-map" class="w-full h-80 bg-slate-100 rounded-3xl overflow-hidden shadow-inner relative z-10 border border-slate-300/50/60">
+                        </div>
+                    </div>
+
+                    <!-- Tracking Stepper -->
+                    <div class="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-300/50/60">
+                        <h3 class="text-xl font-bold text-slate-800 mb-12">Delivery Progress</h3>
+                        
+                        <div class="relative">
+                            <!-- Vertical Line -->
+                            <div class="absolute left-6 top-0 bottom-0 w-0.5 bg-slate-100"></div>
+                            
+                            <!-- Steps -->
+                            <div class="space-y-12">
+                                ${renderStep('Placed', 'Order Recorded', 'We have received your order and are processing payment.', order.status, 'fa-receipt')}
+                                ${renderStep('Packed', 'Items Packed', 'Your fresh essentials are hand-picked and safely packed.', order.status, 'fa-box')}
+                                ${renderStep('Out for Delivery', 'On the Way', 'Our delivery partner is heading to your location.', order.status, 'fa-truck-fast')}
+                                ${renderStep('Delivered', 'Delivered', 'Order successfully handed over at your doorstep.', order.status, 'fa-house-circle-check')}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order Summary Mini -->
+                    <div class="bg-emerald-900 rounded-[2.5rem] p-8 md:p-12 text-white">
+                        <h3 class="text-xl font-bold mb-6">Order Details</h3>
+                        <div class="space-y-4">
+                             ${(order.items || []).map(item => `
+                                <div class="flex justify-between items-center opacity-80">
+                                    <span class="text-sm font-medium">${item.name} × ${item.quantity}</span>
+                                    <span class="text-sm font-bold">${utils.formatCurrency(item.price * item.quantity)}</span>
+                                </div>
+                             `).join('')}
+                             <div class="pt-4 border-t border-emerald-800 flex justify-between items-baseline">
+                                <span class="text-lg font-bold">Total Paid</span>
+                                <span class="text-2xl font-extrabold text-emerald-400">${utils.formatCurrency(order.final_amount)}</span>
+                             </div>
+                        </div>
+                        <div class="mt-12 flex items-center space-x-4 bg-emerald-800/50 p-6 rounded-3xl">
+                             <div class="w-12 h-12 bg-emerald-700 rounded-full flex items-center justify-center text-xl">
+                                <i class="fas fa-location-dot"></i>
+                             </div>
+                             <div>
+                                <h4 class="font-bold text-sm">Delivery to:</h4>
+                                <p class="text-xs text-emerald-200">${order.address?.street || 'Pinned Location'}, ${order.address?.city || ''}</p>
+                             </div>
+                        </div>
+                    </div>
+
+                     <div class="flex justify-center pt-8">
+                          <a href="/shop.html" class="bg-white border border-slate-300/50 hover:border-emerald-600 text-slate-500 hover:text-emerald-600 px-8 py-4 rounded-2xl font-bold transition-all duration-300 ease-out flex items-center space-x-2">
+                             <i class="fas fa-shopping-basket"></i>
+                             <span>Browse more items</span>
+                          </a>
+                     </div>
+                 `;
+
+                // Initialize mapping after DOM update
+                setTimeout(() => initTrackingMap(order.status), 100);
+            } catch (e) {
+                console.error('Error loading tracking:', e);
+                container.innerHTML = `<div class="bg-white p-20 rounded-[2.5rem] text-center"><i class="fas fa-triangle-exclamation text-6xl text-red-100 mb-6 block"></i><h2 class="text-2xl font-bold">Failed to load order</h2><p class="text-slate-400 mb-8">Please check your internet or try again later.</p></div>`;
+            }
+        }
+
+        function renderStep(statusKey, title, desc, currentStatus, icon) {
+            const statusOrder = ['Placed', 'Packed', 'Out for Delivery', 'Delivered'];
+            const currentIndex = statusOrder.indexOf(currentStatus);
+            const stepIndex = statusOrder.indexOf(statusKey);
+
+            const isActive = stepIndex <= currentIndex;
+            const isCurrent = stepIndex === currentIndex;
+
+            return `
+                <div class="flex items-start space-x-8 relative z-10 transition-all duration-300 ease-out ${isActive ? 'opacity-100' : 'opacity-40'}">
+                    <div class="w-12 h-12 flex items-center justify-center rounded-full border-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 ease-out ${isActive ? 'bg-green-700 shadow-[0_10px_40px_rgb(0,0,0,0.06)] shadow-emerald-500/20 border-emerald-50 text-white' : 'bg-white border-slate-50 text-slate-300'}">
+                        <i class="fas ${icon} text-sm"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-extrabold text-lg mt-1 ${isActive ? 'text-slate-800' : 'text-slate-400'}">${title}</h4>
+                        <p class="text-sm text-slate-400 mt-1">${desc}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Leaflet Maps Initialization for Tracking
+        function initTrackingMap(orderStatus) {
+            const mapElement = document.getElementById("tracking-map");
+            if (!mapElement || typeof L === 'undefined') return;
+
+            const storeLoc = [13.0827, 80.2707]; // Chennai format for Leaflet
+            const userLoc = [13.0454, 80.2285];
+
+            const map = L.map('tracking-map', { zoomControl: false }).setView([(storeLoc[0] + userLoc[0]) / 2, (storeLoc[1] + userLoc[1]) / 2], 13);
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(map);
+
+            setTimeout(() => { map.invalidateSize(); }, 500);
+
+            // Store marker
+            L.marker(storeLoc).addTo(map).bindPopup("<b>FreshMart Store</b>").openPopup();
+            // User marker
+            L.marker(userLoc).addTo(map).bindPopup("<b>Your Location</b>");
+
+            if (orderStatus === 'Out for Delivery' || orderStatus === 'Delivered') {
+                const deliveryIcon = L.icon({
+                    iconUrl: 'https://cdn-icons-png.flaticon.com/512/3063/3063822.png',
+                    iconSize: [40, 40],
+                    iconAnchor: [20, 20]
+                });
+
+                const agentMarker = L.marker(orderStatus === 'Delivered' ? userLoc : storeLoc, { icon: deliveryIcon, zIndexOffset: 1000 }).addTo(map);
+
+                if (orderStatus === 'Out for Delivery') {
+                    let step = 0;
+                    setInterval(() => {
+                        step += 0.02;
+                        if (step > 1) return;
+
+                        // Simple arc simulation
+                        const newLat = storeLoc[0] + (userLoc[0] - storeLoc[0]) * Math.sin(step * Math.PI / 2);
+                        const newLng = storeLoc[1] + (userLoc[1] - storeLoc[1]) * step;
+                        agentMarker.setLatLng([newLat, newLng]);
+                    }, 2000);
+                }
+            }
+        }
+    </script>
+    <!-- Mobile Menu Drawer -->
+    <div id="mobile-menu"
+        class="hidden fixed inset-0 z-[1000] bg-emerald-900/60 backdrop-blur-md transition-all duration-500">
+        <div
+            class="bg-gradient-to-b from-white via-white to-emerald-50 w-3/4 h-full p-6 flex flex-col border-r border-emerald-100/50 shadow-[20px_0_40px_rgba(0,0,0,0.1)] overflow-y-auto">
+            <div class="flex items-center justify-between mb-8 pb-4 border-b">
+                <span class="text-xl font-bold text-emerald-800 flex items-center gap-2">
+                    <i class="fas fa-leaf text-emerald-600"></i> Menu
+                </span>
+                <button onclick="document.getElementById('mobile-menu').classList.add('hidden')" class="text-slate-400 hover:text-emerald-600"><i
+                        class="fas fa-times text-2xl"></i></button>
+            </div>
+            <nav class="flex flex-col space-y-4 text-lg font-medium text-slate-600">
+                <a href="/index.html" class="hover:text-emerald-600 py-1 transition-colors">Home</a>
+                <a href="/index2.html" class="hover:text-emerald-600 py-1 transition-colors">Home 2</a>
+                <a href="/about.html" class="hover:text-emerald-600 py-1 transition-colors">About</a>
+                <a href="/shop.html" class="hover:text-emerald-600 py-1 transition-colors">Products</a>
+                <a href="/tracking.html" class="text-emerald-600 font-bold py-1">Track Order</a>
+
+                <a href="/contact.html" class="hover:text-emerald-600 py-1 transition-colors">Contact</a>
+                <a href="/auth.html" id="mobile-nav-login"
+                    class="hover:text-emerald-600 py-1 transition-colors">Login/Register</a>
+                <a href="/dashboard.html" id="mobile-nav-dash"
+                    class="hover:text-emerald-600 py-1 transition-colors hidden">Dashboard</a>
+                <button id="mobile-nav-logout" onclick="utils.logout()"
+                    class="hidden text-left text-red-500 py-1 transition-colors font-bold mt-4 pt-4 border-t border-slate-300/50/60">Sign
+                    Out</button>
+            </nav>
+
+        </div>
+    </div>
+</body>
+
+</html>

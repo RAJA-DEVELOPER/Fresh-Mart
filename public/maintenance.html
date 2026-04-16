@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Under Maintenance - FreshMart</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .gear-spin {
+            animation: spin 8s linear infinite;
+            transform-origin: center;
+        }
+
+        .gear-spin-reverse {
+            animation: spin-reverse 6s linear infinite;
+            transform-origin: center;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes spin-reverse {
+            from {
+                transform: rotate(360deg);
+            }
+
+            to {
+                transform: rotate(0deg);
+            }
+        }
+
+        .pulse-dot {
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+
+            0%,
+            100% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #059669, #10b981, #34d399, #10b981, #059669);
+            background-size: 200% 100%;
+            animation: shimmer 2s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+
+            100% {
+                background-position: 200% 0;
+            }
+        }
+    
+        /* Premium Global Scrollbar and Selection */
+        ::selection {
+            background: #a7f3d0; /* emerald-200 */
+            color: #064e3b; /* emerald-900 */
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f8fafc; 
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+
+        .premium-glass {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+        }
+
+    </style>
+    <link rel="stylesheet" href="/css/global.css">
+</head>
+
+<body
+    class="bg-gradient-to-br from-slate-50 via-emerald-50/30 to-slate-50 min-h-screen flex items-center justify-center p-6">
+
+    <div class="max-w-2xl w-full text-center">
+
+        <!-- Vector Illustration -->
+        <div class="float-animation mb-12">
+            <svg viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-md mx-auto">
+                <!-- Background circle -->
+                <circle cx="250" cy="200" r="150" fill="#ecfdf5" opacity="0.6" />
+                <circle cx="250" cy="200" r="120" fill="#d1fae5" opacity="0.4" />
+
+                <!-- Server rack -->
+                <rect x="175" y="130" width="150" height="180" rx="12" fill="#1f2937" stroke="#374151"
+                    stroke-width="2" />
+                <rect x="185" y="145" width="130" height="30" rx="6" fill="#374151" />
+                <rect x="185" y="185" width="130" height="30" rx="6" fill="#374151" />
+                <rect x="185" y="225" width="130" height="30" rx="6" fill="#374151" />
+                <rect x="185" y="265" width="130" height="30" rx="6" fill="#374151" />
+
+                <!-- Server lights -->
+                <circle cx="200" cy="160" r="4" fill="#10b981" class="pulse-dot" />
+                <circle cx="212" cy="160" r="4" fill="#10b981" class="pulse-dot" style="animation-delay: 0.3s" />
+                <circle cx="200" cy="200" r="4" fill="#f59e0b" class="pulse-dot" style="animation-delay: 0.6s" />
+                <circle cx="212" cy="200" r="4" fill="#10b981" class="pulse-dot" style="animation-delay: 0.9s" />
+                <circle cx="200" cy="240" r="4" fill="#ef4444" class="pulse-dot" style="animation-delay: 1.2s" />
+                <circle cx="212" cy="240" r="4" fill="#ef4444" class="pulse-dot" style="animation-delay: 1.5s" />
+                <circle cx="200" cy="280" r="4" fill="#10b981" class="pulse-dot" style="animation-delay: 0.2s" />
+                <circle cx="212" cy="280" r="4" fill="#f59e0b" class="pulse-dot" style="animation-delay: 0.8s" />
+
+                <!-- Server vents -->
+                <line x1="270" y1="152" x2="305" y2="152" stroke="#4b5563" stroke-width="2" stroke-linecap="round" />
+                <line x1="270" y1="157" x2="305" y2="157" stroke="#4b5563" stroke-width="2" stroke-linecap="round" />
+                <line x1="270" y1="162" x2="305" y2="162" stroke="#4b5563" stroke-width="2" stroke-linecap="round" />
+                <line x1="270" y1="192" x2="305" y2="192" stroke="#4b5563" stroke-width="2" stroke-linecap="round" />
+                <line x1="270" y1="197" x2="305" y2="197" stroke="#4b5563" stroke-width="2" stroke-linecap="round" />
+                <line x1="270" y1="202" x2="305" y2="202" stroke="#4b5563" stroke-width="2" stroke-linecap="round" />
+
+                <!-- Wrench -->
+                <g transform="translate(340, 120) rotate(30)">
+                    <rect x="-5" y="0" width="10" height="60" rx="4" fill="#6b7280" />
+                    <circle cx="0" cy="0" r="18" fill="none" stroke="#6b7280" stroke-width="8" />
+                    <rect x="-10" y="-8" width="20" height="16" fill="#ecfdf5" />
+                </g>
+
+                <!-- Gear 1 -->
+                <g transform="translate(110, 160)" class="gear-spin">
+                    <path
+                        d="M0,-30 L6,-28 L8,-20 L16,-18 L18,-24 L24,-22 L22,-14 L28,-8 L24,-4 L28,4 L22,8 L24,14 L18,18 L16,12 L8,14 L6,22 L0,24 L-6,22 L-8,14 L-16,12 L-18,18 L-24,14 L-22,8 L-28,4 L-24,-4 L-28,-8 L-22,-14 L-24,-22 L-18,-24 L-16,-18 L-8,-20 L-6,-28 Z"
+                        fill="#059669" opacity="0.7" />
+                    <circle cx="0" cy="0" r="12" fill="#ecfdf5" />
+                    <circle cx="0" cy="0" r="6" fill="#059669" opacity="0.5" />
+                </g>
+
+                <!-- Gear 2 -->
+                <g transform="translate(390, 250)" class="gear-spin-reverse">
+                    <path
+                        d="M0,-22 L4,-20 L6,-14 L12,-13 L13,-18 L18,-16 L16,-10 L20,-6 L18,-3 L20,3 L16,6 L18,10 L13,13 L12,9 L6,10 L4,16 L0,18 L-4,16 L-6,10 L-12,9 L-13,13 L-18,10 L-16,6 L-20,3 L-18,-3 L-20,-6 L-16,-10 L-18,-16 L-13,-18 L-12,-13 L-6,-14 L-4,-20 Z"
+                        fill="#10b981" opacity="0.6" />
+                    <circle cx="0" cy="0" r="8" fill="#ecfdf5" />
+                    <circle cx="0" cy="0" r="4" fill="#10b981" opacity="0.4" />
+                </g>
+
+                <!-- Cable connections -->
+                <path d="M175,180 Q140,180 130,200 Q120,220 140,240 Q160,260 175,250" fill="none" stroke="#059669"
+                    stroke-width="3" stroke-dasharray="6,4" opacity="0.4" />
+                <path d="M325,200 Q360,200 370,220 Q380,240 370,255" fill="none" stroke="#10b981" stroke-width="3"
+                    stroke-dasharray="6,4" opacity="0.4" />
+
+                <!-- Leaf logo on server -->
+                <g transform="translate(250, 290)">
+                    <path d="M-8,-5 Q0,-15 8,-5 Q5,5 0,8 Q-5,5 -8,-5Z" fill="#10b981" />
+                    <line x1="0" y1="2" x2="0" y2="8" stroke="#10b981" stroke-width="1.5" />
+                </g>
+            </svg>
+        </div>
+
+        <!-- Content -->
+        <div class="space-y-6">
+            <div
+                class="inline-flex items-center gap-2 bg-amber-100 text-amber-700 px-4 py-2 rounded-full text-sm font-bold">
+                <i class="fas fa-tools"></i>
+                <span>Scheduled Maintenance</span>
+            </div>
+
+            <h1 class="text-4xl md:text-5xl font-extrabold text-slate-800 leading-tight">
+                We'll Be Back <span class="text-emerald-600">Soon!</span>
+            </h1>
+
+            <p class="text-slate-500 text-lg max-w-md mx-auto leading-relaxed">
+                We're making FreshMart even better for you. Our team is performing scheduled maintenance to improve your
+                shopping experience.
+            </p>
+
+            <!-- Progress bar -->
+            <div class="max-w-lg mx-auto">
+                <div class="bg-slate-200 rounded-full h-2 overflow-hidden">
+                    <div class="progress-bar h-full rounded-full w-3/4"></div>
+                </div>
+                <p class="text-xs text-slate-400 mt-2">Estimated completion: ~30 minutes</p>
+            </div>
+
+            <!-- Notification signup -->
+            <div class="bg-white rounded-2xl p-6 border border-slate-300/50/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] max-w-md mx-auto mt-8">
+                <p class="text-sm font-semibold text-slate-700 mb-3">Get notified when we're back</p>
+                <div class="flex gap-2">
+                    <input type="email" placeholder="your@email.com"
+                        class="flex-1 bg-slate-50 border-none rounded-[1.25rem] px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-500/30 focus:bg-white transition-all duration-300 ease-out">
+                    <button
+                        class="bg-green-700 hover:from-emerald-400 hover:to-teal-500 shadow-[0_20px_50px_rgba(8,112,184,0.07)] shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:-translate-y-0.5 text-white px-6 py-3 rounded-[1.25rem] font-bold text-sm transition-all duration-300 ease-out shadow-[0_20px_50px_rgba(8,112,184,0.07)] shadow-emerald-500/20">
+                        Notify Me
+                    </button>
+                </div>
+            </div>
+
+            <!-- Social links -->
+            <div class="flex items-center justify-center gap-4 pt-4">
+                <span class="text-xs text-slate-400">Follow us:</span>
+                <a href="#"
+                    class="w-9 h-9 bg-slate-100 hover:bg-emerald-100 text-slate-400 hover:text-emerald-600 rounded-full flex items-center justify-center transition-all duration-300 ease-out">
+                    <i class="fab fa-twitter text-sm"></i>
+                </a>
+                <a href="#"
+                    class="w-9 h-9 bg-slate-100 hover:bg-emerald-100 text-slate-400 hover:text-emerald-600 rounded-full flex items-center justify-center transition-all duration-300 ease-out">
+                    <i class="fab fa-instagram text-sm"></i>
+                </a>
+                <a href="#"
+                    class="w-9 h-9 bg-slate-100 hover:bg-emerald-100 text-slate-400 hover:text-emerald-600 rounded-full flex items-center justify-center transition-all duration-300 ease-out">
+                    <i class="fab fa-facebook-f text-sm"></i>
+                </a>
+            </div>
+
+            <p class="text-xs text-slate-300 pt-6">&copy; 2026 FreshMart Supermarket. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="/js/animations.js" defer></script>
+</body>
+
+</html>
