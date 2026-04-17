@@ -509,7 +509,12 @@
                     `).join('');
                 }
             } catch (e) {
-                window.location.href = '/auth.html';
+                if (e.status === 401 || e.status === 403) {
+                    window.location.href = '/auth.html';
+                } else {
+                    list.innerHTML = `<div class="col-span-full py-8 text-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-300/50 text-slate-400 text-sm">No addresses saved. Please add one to continue.</div>`;
+                    toggleAddressForm(true);
+                }
             }
         }
 
@@ -592,8 +597,8 @@
                     return;
                 }
 
-                utils.showToast(e.message || 'Proceeding to shop...', 'error');
-                setTimeout(() => window.location.href = '/shop.html', 1500);
+                utils.showToast('Your cart is empty. Add items to proceed.', 'error');
+                setTimeout(() => window.location.href = '/cart.html', 1500);
             }
         }
 
