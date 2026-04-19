@@ -56,10 +56,10 @@
     <link rel="stylesheet" href="/css/global.css">
 </head>
 
-<body class="bg-stone-50 min-h-screen text-gray-900 antialiased">
+<body class="bg-white lg:bg-stone-50 h-screen flex flex-col text-gray-900 antialiased overflow-hidden">
 
     <!-- Header -->
-    <header class="fixed top-0 left-0 w-full top-0 z-50 bg-white/80 backdrop-blur-2xl border-b border-emerald-100/60 shadow-sm shadow-emerald-500/10">
+    <header class="bg-white/80 backdrop-blur-2xl border-b border-emerald-100/60 shadow-sm shadow-emerald-500/10">
         <div class="container mx-auto px-4 py-3 flex items-center justify-between">
             <!-- Logo -->
             <a href="/" class="flex items-center space-x-2 shrink-0">
@@ -118,7 +118,9 @@
         
     </header>
 
-    <main class="flex min-h-[calc(100vh-64px)] lg:h-[calc(100vh-64px)] bg-white overflow-y-auto lg:overflow-hidden">
+    <main class="flex-1 flex bg-white overflow-hidden">
+        <!-- Scrollable content wrapper -->
+        <div class="flex-1 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden">
         <!-- Left Side: Cinematic Visuals (Hidden on mobile) -->
         <div class="hidden lg:flex lg:w-1/2 relative overflow-hidden group">
             <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=1600&q=80" alt="Fresh Produce"
@@ -275,11 +277,9 @@
                 </form>
 
             </div>
+        </div>
     </main>
 
-    <footer class="p-8 text-center text-slate-300 text-xs">
-        &copy; 2026 FreshMart Supermarket. All rights reserved.
-    </footer>
 
     <script src="/js/api.js"></script>
     <script src="/js/utils/utils.js"></script>
