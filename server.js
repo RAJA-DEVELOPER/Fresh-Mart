@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
+const compression = require('compression');
 const http = require('http');
 const { Server } = require('socket.io');
 const errorHandler = require('./middleware/errorHandler');
@@ -34,6 +35,7 @@ io.on('connection', (socket) => {
 
 // Middleware
 app.use(cors());
+app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -51,8 +53,17 @@ app.use((req, res, next) => {
     next();
 });
 
-// Serve Static Files
-app.use(express.static(path.join(__dirname, 'public')));
+// Serve Static Files with Aggressive Caching
+app.use(express.static(path.join(__dirname, 'public'), {
+    maxAge: '1y',
+    immutable: true,
+    setHeaders: (res, path) => {
+        if (path.endsWith('.html')) {
+            // Lower cache for HTML files to ensure updates reach users
+            res.setHeader('Cache-Control', 'public, max-age=3600');
+        }
+    }
+}));
 
 // Routes
 const testRoutes = require('./routes/testRoutes');

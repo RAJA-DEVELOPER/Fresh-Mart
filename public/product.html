@@ -159,7 +159,10 @@
                 document.getElementById('product-detail-container').innerHTML = `
                     <!-- Image -->
                     <div class="bg-white rounded-3xl p-4 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex items-center justify-center border border-slate-300/50/60 overflow-hidden">
-                        <img src="${product.image_url || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80'}" alt="${product.name}" class="w-full h-full object-contain hover:scale-105 transition-transform duration-500">
+                        <img src="${(product.image_url || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80').replace(/\.(png|jpe?g)/i, '.webp')}" 
+                             alt="${product.name}" 
+                             decoding="async"
+                             class="w-full h-full object-contain hover:scale-105 transition-transform duration-500">
                     </div>
 
                     <!-- Content -->

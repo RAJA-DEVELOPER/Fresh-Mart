@@ -286,9 +286,10 @@
                             <!-- Image Section -->
                             <div class="aspect-square bg-stone-50 rounded-[1.75rem] mb-5 overflow-hidden relative">
                                 <a href="/product.html?id=${prod.id}" class="block h-full w-full">
-                                    <img src="${prod.image_url || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400'}" 
+                                    <img src="${(prod.image_url || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400').replace(/\.(png|jpe?g)/i, '.webp')}" 
                                          alt="${prod.name}" 
                                          loading="lazy"
+                                         decoding="async"
                                          class="w-full h-full object-cover image-lift-hover">
                                 </a>
                                 ${prod.stock < 10 ? `<span class="absolute top-4 left-4 bg-red-500 text-white text-[10px] font-black px-3 py-1 rounded-full z-10 shadow-lg">ONLY ${prod.stock} LEFT</span>` : ''}
